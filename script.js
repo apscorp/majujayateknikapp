@@ -1,7 +1,6 @@
-// Ganti dengan URL Deployment Web App Apps Script Anda di Langkah 2
-const API_URL = "https://script.google.com/macros/s/AKfycbwak_cV5fGbyPFbJZpOTt2q6-snrUd83iX4SZ2qwSE9iQcM5nwN8kl29Wx7J-PoJDeI7w/exec";
+// Pasang URL Web App Deployment Baru di sini
+const API_URL = "https://script.google.com/macros/s/AKfycbxYRW-gJDU56uRJGqz2wGubv_GOwPlLK1YWfSL1H_2Frob5RyJ_TPRv8c_xcF2UrXPL3w/exec";
 
-// FUNGSI ABSENSI DENGAN DETEKSI GPS AUTOMATIS
 function submitAbsen() {
   const teknisi = document.getElementById("namaTeknisi").value;
   const tipe = document.getElementById("tipeAbsen").value;
@@ -17,24 +16,31 @@ function submitAbsen() {
       const long = position.coords.longitude;
       const gpsString = `${lat}, ${long}`;
 
-      const payload = {
+      const params = new URLSearchParams({
         action: "absen",
         namaTeknisi: teknisi,
         tipeAbsen: tipe,
         lokasiGPS: gpsString,
         fotoSelfie: "-"
-      };
+      });
 
-      sendToAPI(payload, "Absensi Berhasil!");
+      // Pengiriman via fetch GET / no-cors agar berjalan mulus dari GitHub Pages
+      fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' })
+        .then(() => {
+          alert("Absensi Berhasil Terkirim!");
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Gagal mengirim absensi.");
+        });
     }, () => {
-      alert("Gagal mengambil lokasi GPS. Pastikan izin GPS browser diaktifkan.");
+      alert("Gagal mengambil lokasi GPS. Pastikan izin lokasi/GPS di browser diaktifkan.");
     });
   } else {
-    alert("Browser Anda tidak mendukung deteksi GPS.");
+    alert("Browser tidak mendukung GPS.");
   }
 }
 
-// FUNGSI UPDATE TOMBOL STATUS SPK & TIMER
 function updateStatusSPK(statusText) {
   const idSPK = document.getElementById("inputIDSPK").value;
 
@@ -43,27 +49,18 @@ function updateStatusSPK(statusText) {
     return;
   }
 
-  const payload = {
+  const params = new URLSearchParams({
     action: "updateSPK",
     idSPK: idSPK,
     statusPekerjaan: statusText
-  };
-
-  sendToAPI(payload, `Status SPK [${idSPK}] berhasil diubah menjadi: ${statusText}`);
-}
-
-// FUNGSI PENGIRIMAN DATA KE GOOGLE SHEETS VIA API
-function sendToAPI(payload, successMessage) {
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert(successMessage);
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Data berhasil terkirim ke sistem!");
   });
+
+  fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' })
+    .then(() => {
+      alert(`Status SPK [${idSPK}] berhasil diperbarui!`);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Gagal memperbarui SPK.");
+    });
 }
