@@ -3,61 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maju Jaya Teknik - Sistem Operasional</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Sistem Operasional | Maju Jaya Teknik</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    body { background-color: #f4f6f9; font-family: sans-serif; }
+    .card-custom { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .btn-action { min-height: 48px; font-weight: bold; border-radius: 10px; }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-  <nav class="navbar navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-      <span class="navbar-brand mb-0 h1">Maju Jaya Teknik Web App</span>
-    </div>
-  </nav>
+<nav class="navbar navbar-dark bg-primary mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-gears me-2"></i>Maju Jaya Teknik System</a>
+  </div>
+</nav>
 
-  <div class="container mb-5">
-    <!-- PANEL ABSENSI TEKNISI -->
-    <div class="card mb-4 shadow-sm">
-      <div class="card-header bg-white font-weight-bold">Form Absensi Harian</div>
-      <div class="card-body">
-        <form id="formAbsensi">
+<div class="container pb-5">
+  <!-- Nav Tabs -->
+  <ul class="nav nav-pills nav-justified mb-4" id="pills-tab" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" id="tab-absensi" data-bs-toggle="pill" data-bs-target="#content-absensi"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="tab-teknisi" data-bs-toggle="pill" data-bs-target="#content-teknisi"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="tab-keuangan" data-bs-toggle="pill" data-bs-target="#content-keuangan"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="tab-laporan" data-bs-toggle="pill" data-bs-target="#content-laporan" onclick="loadReport()"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="pills-tabContent">
+    
+    <!-- TAB 1: ABSENSI -->
+    <div class="tab-pane fade show active" id="content-absensi">
+      <div class="card card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i>Absensi Harian Karyawan</h5>
+        <form id="formAbsen">
           <div class="mb-3">
-            <label class="form-label">Nama Teknisi</label>
-            <select class="form-select" id="namaTeknisi" required>
-              <option value="">-- Pilih Teknisi --</option>
-              <option value="TEK-01 (Andri)">TEK-01 (Andri)</option>
-              <option value="TEK-02 (Budi)">TEK-02 (Budi)</option>
-            </select>
+            <label class="form-label">ID / Nama Karyawan</label>
+            <input type="text" id="absenNama" class="form-control" placeholder="Contoh: Budi (Teknisi)" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Tipe Absen</label>
-            <select class="form-select" id="tipeAbsen" required>
-              <option value="Masuk">Masuk</option>
-              <option value="Keluar">Keluar</option>
+            <select id="absenTipe" class="form-select" required>
+              <option value="MASUK">Absen Masuk</option>
+              <option value="PULANG">Absen Pulang</option>
             </select>
           </div>
-          <button type="button" class="btn btn-success w-100" onclick="submitAbsen()">Kirim Absen (GPS)</button>
+          <button type="submit" class="btn btn-primary w-100 btn-action"><i class="fa-solid fa-paper-plane me-2"></i>Kirim Absensi</button>
         </form>
       </div>
     </div>
 
-    <!-- PANEL TIME TRACKER SPK TEKNISI -->
-    <div class="card shadow-sm">
-      <div class="card-header bg-white font-weight-bold">Tracking Waktu SPK Lapangan</div>
-      <div class="card-body">
-        <div class="mb-3">
-          <label class="form-label">ID SPK Pekerjaan</label>
-          <input type="text" class="form-control" id="inputIDSPK" placeholder="Contoh: SPK-1001">
+    <!-- TAB 2: TRACKER TEKNISI & ETIMASI WAKTU -->
+    <div class="tab-pane fade" id="content-teknisi">
+      <div class="card card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Input Pekerjaan Visit Baru (Admin)</h5>
+        <form id="formJob">
+          <div class="row g-2">
+            <div class="col-md-6 mb-2">
+              <input type="text" id="jobTeknisi" class="form-control" placeholder="Nama Teknisi" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <input type="text" id="jobCustomer" class="form-control" placeholder="Nama Customer" required>
+            </div>
+            <div class="col-12 mb-2">
+              <input type="text" id="jobAlamat" class="form-control" placeholder="Alamat Customer" required>
+            </div>
+            <div class="col-12 mb-3">
+              <input type="text" id="jobJenis" class="form-control" placeholder="Jenis Pekerjaan (Servis AC / Isi Freon / Kulkas)" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-plus me-2"></i>Buat Jadwal Visit</button>
+        </form>
+      </div>
+
+      <div class="card card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan (Teknisi)</h5>
+        <form id="formStatusJob">
+          <div class="mb-3">
+            <label class="form-label">ID Pekerjaan (JOB ID)</label>
+            <input type="text" id="statusJobId" class="form-control" placeholder="Contoh: JOB-172562..." required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Aksi Status</label>
+            <select id="statusAction" class="form-select" required>
+              <option value="BERANGKAT">1. Berangkat dari Toko/Customer Sebelumnya</option>
+              <option value="TIBA">2. Tiba di Lokasi Customer</option>
+              <option value="MULAI_KERJA">3. Mulai Pengerjaan</option>
+              <option value="SELESAI">4. Selesai Pengerjaan</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-warning w-100 btn-action text-dark"><i class="fa-solid fa-rotate me-2"></i>Update Waktu & Status</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 3: PENCATATAN KEUANGAN -->
+    <div class="tab-pane fade" id="content-keuangan">
+      <div class="card card-custom p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-success me-2"></i>Catat Pemasukan / Pengeluaran</h5>
+        <form id="formKeuangan">
+          <div class="mb-3">
+            <label class="form-label">Tipe Transaksi</label>
+            <select id="keuTipe" class="form-select" required>
+              <option value="Pemasukan">Pemasukan</option>
+              <option value="Pengeluaran">Pengeluaran</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Kategori</label>
+            <input type="text" id="keuKategori" class="form-control" placeholder="Service AC / Beli Freon / Bensin / Gaji" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Jumlah (Rp)</label>
+            <input type="number" id="keuJumlah" class="form-control" placeholder="150000" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Keterangan</label>
+            <textarea id="keuKeterangan" class="form-control" rows="2" placeholder="Catatan opsional..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-floppy-disk me-2"></i>Simpan Transaksi</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 4: LAPORAN & ESTIMASI -->
+    <div class="tab-pane fade" id="content-laporan">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card card-custom p-3 bg-white border-start border-success border-4">
+            <small class="text-muted fw-bold">TOTAL PEMASUKAN</small>
+            <h4 class="fw-bold text-success mb-0" id="repPemasukan">Rp 0</h4>
+          </div>
         </div>
-        <div class="d-grid gap-2">
-          <button class="btn btn-warning" onclick="updateStatusSPK('Jalan Ke Lokasi')">🚗 1. Mulai Perjalanan</button>
-          <button class="btn btn-info text-white" onclick="updateStatusSPK('Tiba Di Lokasi')">📍 2. Tiba di Lokasi</button>
-          <button class="btn btn-primary" onclick="updateStatusSPK('Sedang Dikerjakan')">🛠️ 3. Mulai Pengerjaan</button>
-          <button class="btn btn-success" onclick="updateStatusSPK('Selesai')">✅ 4. Selesai Pengerjaan</button>
+        <div class="col-md-4">
+          <div class="card card-custom p-3 bg-white border-start border-danger border-4">
+            <small class="text-muted fw-bold">TOTAL PENGELUARAN</small>
+            <h4 class="fw-bold text-danger mb-0" id="repPengeluaran">Rp 0</h4>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-custom p-3 bg-white border-start border-primary border-4">
+            <small class="text-muted fw-bold">SALDO BERSIH</small>
+            <h4 class="fw-bold text-primary mb-0" id="repSaldo">Rp 0</h4>
+          </div>
+        </div>
+
+        <div class="col-md-6 mt-3">
+          <div class="card card-custom p-4 bg-white">
+            <h6 class="fw-bold text-secondary"><i class="fa-solid fa-route me-2"></i>Rata-Rata Perjalanan</h6>
+            <h2 class="fw-bold text-dark mt-2" id="repAvgJalan">0 <small class="fs-6">Menit</small></h2>
+            <small class="text-muted">Diukur dari keberangkatan hingga sampai di tempat customer.</small>
+          </div>
+        </div>
+
+        <div class="col-md-6 mt-3">
+          <div class="card card-custom p-4 bg-white">
+            <h6 class="fw-bold text-secondary"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Rata-Rata Pengerjaan</h6>
+            <h2 class="fw-bold text-dark mt-2" id="repAvgKerja">0 <small class="fs-6">Menit</small></h2>
+            <small class="text-muted">Diukur dari awal teknisi mulai hingga pengerjaan selesai.</small>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/bootstrap.bundle.min.js"></script>
+<script>
+  // GANTI URL INI DENGAN URL WEB APP DEPLOYMENT GOOGLE APPS SCRIPT ANDA
+  const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+
+  async function postData(action, data) {
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: action, data: data })
+      });
+      return await res.json();
+    } catch (e) {
+      alert("Gagal terhubung ke database!");
+      console.error(e);
+    }
+  }
+
+  // Absensi Form
+  document.getElementById("formAbsen").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await postData("absen", {
+      id_karyawan: document.getElementById("absenNama").value,
+      nama: document.getElementById("absenNama").value,
+      tipe: document.getElementById("absenTipe").value
+    });
+    alert(res.message);
+  });
+
+  // Create Job
+  document.getElementById("formJob").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await postData("update_job_status", {
+      status_action: "CREATE",
+      id_teknisi: document.getElementById("jobTeknisi").value,
+      nama_teknisi: document.getElementById("jobTeknisi").value,
+      nama_customer: document.getElementById("jobCustomer").value,
+      alamat: document.getElementById("jobAlamat").value,
+      jenis_pekerjaan: document.getElementById("jobJenis").value
+    });
+    alert(res.message);
+    e.target.reset();
+  });
+
+  // Update Status Job (Teknisi Tracker)
+  document.getElementById("formStatusJob").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await postData("update_job_status", {
+      id_job: document.getElementById("statusJobId").value,
+      status_action: document.getElementById("statusAction").value
+    });
+    alert(res.message);
+  });
+
+  // Input Keuangan
+  document.getElementById("formKeuangan").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await postData("add_keuangan", {
+      tipe: document.getElementById("keuTipe").value,
+      kategori: document.getElementById("keuKategori").value,
+      jumlah: document.getElementById("keuJumlah").value,
+      keterangan: document.getElementById("keuKeterangan").value
+    });
+    alert(res.message);
+    e.target.reset();
+  });
+
+  // Load Laporan
+  async function loadReport() {
+    const res = await postData("get_report", {});
+    if (res && res.status === "success") {
+      const d = res.data;
+      document.getElementById("repPemasukan").innerText = "Rp " + Number(d.pemasukan).toLocaleString('id-ID');
+      document.getElementById("repPengeluaran").innerText = "Rp " + Number(d.pengeluaran).toLocaleString('id-ID');
+      document.getElementById("repSaldo").innerText = "Rp " + Number(d.saldo).toLocaleString('id-ID');
+      document.getElementById("repAvgJalan").innerHTML = d.avg_durasi_perjalanan_menit + ' <small class="fs-6">Menit</small>';
+      document.getElementById("repAvgKerja").innerHTML = d.avg_durasi_pengerjaan_menit + ' <small class="fs-6">Menit</small>';
+    }
+  }
+</script>
 </body>
 </html>
