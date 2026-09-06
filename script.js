@@ -1,5 +1,5 @@
 // Ganti dengan URL Deployment Web App Apps Script Anda di Langkah 2
-const API_URL = "PASANG_WEB_APP_URL_GAS_DISINI";
+const API_URL = "https://script.google.com/macros/s/AKfycbwak_cV5fGbyPFbJZpOTt2q6-snrUd83iX4SZ2qwSE9iQcM5nwN8kl29Wx7J-PoJDeI7w/exec";
 
 // FUNGSI ABSENSI DENGAN DETEKSI GPS AUTOMATIS
 function submitAbsen() {
