@@ -42,18 +42,20 @@ function submitAbsen() {
 }
 
 function updateStatusSPK(statusText) {
-  const idSPK = document.getElementById("inputIDSPK").value;
-
-  if (!idSPK) {
-    alert("Masukkan ID SPK terlebih dahulu!");
+  const idSPKInput = document.getElementById("inputIDSPK");
+  if (!idSPKInput || !idSPKInput.value.trim()) {
+    alert("Silakan masukkan ID SPK Pekerjaan terlebih dahulu!");
     return;
   }
 
-  const params = new URLSearchParams({
-    action: "updateSPK",
-    idSPK: idSPK,
-    statusPekerjaan: statusText
+  const idSPK = idSPKInput.value.trim();
+
+  sendData({ 
+    action: "updateSPK", 
+    idSPK: idSPK, 
+    statusPekerjaan: statusText 
   });
+}
 
   fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' })
     .then(() => {
