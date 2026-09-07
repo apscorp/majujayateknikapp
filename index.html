@@ -52,11 +52,20 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Tipe Absen</label>
-            <select id="absenTipe" class="form-select" required>
+            <select id="absenTipe" class="form-select" onchange="toggleKeteranganAbsen()" required>
               <option value="MASUK">Absen Masuk</option>
               <option value="PULANG">Absen Pulang</option>
+              <option value="SAKIT">Sakit</option>
+              <option value="IZIN">Izin</option>
             </select>
           </div>
+
+          <!-- Keterangan Absen (Muncul jika pilih Sakit / Izin / Masuk Opsional) -->
+          <div class="mb-3" id="secKetAbsen">
+            <label class="form-label" id="lblKetAbsen">Keterangan / Alasan</label>
+            <textarea id="absenKeterangan" class="form-control" rows="2" placeholder="Sebutkan alasan izin/sakit atau catatan tambahan..."></textarea>
+          </div>
+
           <button type="submit" class="btn btn-primary w-100 btn-action"><i class="fa-solid fa-paper-plane me-2"></i>Kirim Absensi</button>
         </form>
       </div>
@@ -119,7 +128,6 @@
             </select>
           </div>
 
-          <!-- Pilihan Sinkronisasi ID Pekerjaan -->
           <div class="mb-3" id="secJobRef">
             <label class="form-label fw-bold text-primary"><i class="fa-solid fa-link me-1"></i>Pilih Pekerjaan (JOB ID)</label>
             <select id="keuJobRef" class="form-select" onchange="autoFillCategory()">
@@ -132,7 +140,6 @@
             <input type="text" id="keuKategori" class="form-control" placeholder="Service AC / Beli Freon / Bensin / Gaji" required>
           </div>
 
-          <!-- Rincian Biaya Jasa & Sparepart untuk Pemasukan Job -->
           <div id="secRincianBiaya" class="p-3 mb-3 bg-light rounded border">
             <div class="fw-bold mb-2 text-secondary"><i class="fa-solid fa-receipt me-1"></i>Rincian Biaya Pemasukan</div>
             <div class="row g-2">
@@ -242,7 +249,7 @@
     }
   }
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxugXEDshzZwVp2MZfA9kRr7zjFi33WR73ROhYIYD9ZwAvXWGs-4n81LUrVFCO-EiGYeA/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzW97UJf4b3lNiDRbSmmPbbYtIm_2d-i5ah5KTvwbjq7DzF4HBj3qAqAjwaKQv6bQ3QhQ/exec";
 
   async function postData(action, data) {
     try {
@@ -257,7 +264,34 @@
     }
   }
 
-  // Load Daftar Pekerjaan untuk Keuangan
+  function toggleKeteranganAbsen() {
+    const tipe = document.getElementById("absenTipe").value;
+    const ketInput = document.getElementById("absenKeterangan");
+    const lbl = document.getElementById("lblKetAbsen");
+
+    if (tipe === "SAKIT" || tipe === "IZIN") {
+      lbl.innerText = "Alasan " + (tipe === "SAKIT" ? "Sakit" : "Izin") + " (Wajib)";
+      ketInput.setAttribute("required", "true");
+    } else {
+      lbl.innerText = "Keterangan / Alasan (Opsional)";
+      ketInput.removeAttribute("required");
+    }
+  }
+
+  // Absensi Form
+  document.getElementById("formAbsen").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await postData("absen", {
+      id_karyawan: document.getElementById("absenNama").value,
+      nama: document.getElementById("absenNama").value,
+      tipe: document.getElementById("absenTipe").value,
+      keterangan: document.getElementById("absenKeterangan").value
+    });
+    if (res) alert(res.message);
+    e.target.reset();
+  });
+
+  // Load Active Jobs
   async function loadActiveJobs() {
     const res = await postData("get_active_jobs", {});
     if (res && res.status === "success") {
@@ -294,17 +328,6 @@
       document.getElementById("secRincianBiaya").style.display = "block";
     }
   }
-
-  // Absensi Form
-  document.getElementById("formAbsen").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const res = await postData("absen", {
-      id_karyawan: document.getElementById("absenNama").value,
-      nama: document.getElementById("absenNama").value,
-      tipe: document.getElementById("absenTipe").value
-    });
-    if (res) alert(res.message);
-  });
 
   // Create Job
   document.getElementById("formJob").addEventListener("submit", async (e) => {
