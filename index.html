@@ -28,7 +28,7 @@
   </div>
 </nav>
 
-<!-- Modal Pilih Role (Tampil saat Pertama Kali Buka) -->
+<!-- Modal Pilih Role -->
 <div class="modal fade" id="roleModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content p-3 text-center">
@@ -40,11 +40,29 @@
           <i class="fa-solid fa-helmet-safety fa-lg me-2"></i>Akses Teknisi
           <div class="small fw-normal text-muted mt-1">Absensi & Update Status Pekerjaan</div>
         </button>
-        <button class="btn btn-primary btn-lg fw-bold p-3" onclick="setRole('ADMIN')">
+        <button class="btn btn-primary btn-lg fw-bold p-3" onclick="requestAdminAccess()">
           <i class="fa-solid fa-user-gear fa-lg me-2"></i>Akses Admin
           <div class="small fw-normal text-white-50 mt-1">Akses Penuh (Keuangan, Laporan, Buat Jadwal)</div>
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Password Admin -->
+<div class="modal fade" id="adminAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content p-3">
+      <h5 class="fw-bold text-center mb-3"><i class="fa-solid fa-lock text-danger me-2"></i>Password Admin</h5>
+      <form id="formAdminAuth">
+        <div class="mb-3">
+          <input type="password" id="adminPasswordInput" class="form-control text-center fs-5" placeholder="Masukkan PIN/Password" required>
+        </div>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary fw-bold">Masuk Admin</button>
+          <button type="button" class="btn btn-light text-muted" onclick="cancelAdminAuth()">Batal</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -257,9 +275,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  const ADMIN_PASS = "890890";
   let activeJobsList = [];
   let currentRole = localStorage.getItem("app_role") || "";
   let roleModalObj = new bootstrap.Modal(document.getElementById('roleModal'));
+  let adminAuthModalObj = new bootstrap.Modal(document.getElementById('adminAuthModal'));
 
   window.addEventListener('DOMContentLoaded', () => {
     if (!currentRole) {
@@ -269,10 +289,33 @@
     }
   });
 
+  function requestAdminAccess() {
+    roleModalObj.hide();
+    document.getElementById("adminPasswordInput").value = "";
+    adminAuthModalObj.show();
+  }
+
+  function cancelAdminAuth() {
+    adminAuthModalObj.hide();
+    roleModalObj.show();
+  }
+
+  document.getElementById("formAdminAuth").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const inputPass = document.getElementById("adminPasswordInput").value;
+    if (inputPass === ADMIN_PASS) {
+      adminAuthModalObj.hide();
+      setRole('ADMIN');
+    } else {
+      alert("Password Admin Salah!");
+      document.getElementById("adminPasswordInput").value = "";
+    }
+  });
+
   function setRole(role) {
     currentRole = role;
     localStorage.setItem("app_role", role);
-    roleModalObj.hide();
+    if (roleModalObj) roleModalObj.hide();
     applyRolePermissions(role);
   }
 
@@ -287,12 +330,9 @@
     document.getElementById("userRoleBadge").innerText = "Role: " + role;
 
     if (role === "TEKNISI") {
-      // Sembunyikan elemen khusus Admin
       document.querySelectorAll(".role-admin-only").forEach(el => el.classList.add("role-hide"));
-      // Pastikan tab default aktif di Absensi
       switchTab('content-absensi', document.getElementById('tabBtnAbsensi'));
     } else {
-      // Tampilkan seluruh elemen untuk Admin
       document.querySelectorAll(".role-admin-only").forEach(el => el.classList.remove("role-hide"));
     }
   }
