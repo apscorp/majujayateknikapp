@@ -12,36 +12,63 @@
     .btn-action { min-height: 48px; font-weight: bold; border-radius: 10px; }
     .tab-content-item { display: none; }
     .tab-content-item.active { display: block; }
+    .role-hide { display: none !important; }
   </style>
 </head>
 <body>
 
+<!-- Navbar -->
 <nav class="navbar navbar-dark bg-primary mb-4">
-  <div class="container">
+  <div class="container d-flex justify-content-between align-items-center">
     <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-gears me-2"></i>Maju Jaya Teknik System</a>
+    <div id="userInfo" class="text-white d-none">
+      <span class="badge bg-light text-dark me-2" id="userRoleBadge">Role: -</span>
+      <button class="btn btn-outline-light btn-sm" onclick="switchRole()"><i class="fa-solid fa-right-from-bracket me-1"></i>Ganti Role</button>
+    </div>
   </div>
 </nav>
 
-<div class="container pb-5">
+<!-- Modal Pilih Role (Tampil saat Pertama Kali Buka) -->
+<div class="modal fade" id="roleModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3 text-center">
+      <h4 class="fw-bold mb-3"><i class="fa-solid fa-user-shield text-primary me-2"></i>Pilih Mode Akses</h4>
+      <p class="text-muted">Silakan pilih jenis akun untuk menyesuaikan tampilan aplikasi.</p>
+      
+      <div class="d-grid gap-3 mt-3">
+        <button class="btn btn-outline-primary btn-lg fw-bold p-3" onclick="setRole('TEKNISI')">
+          <i class="fa-solid fa-helmet-safety fa-lg me-2"></i>Akses Teknisi
+          <div class="small fw-normal text-muted mt-1">Absensi & Update Status Pekerjaan</div>
+        </button>
+        <button class="btn btn-primary btn-lg fw-bold p-3" onclick="setRole('ADMIN')">
+          <i class="fa-solid fa-user-gear fa-lg me-2"></i>Akses Admin
+          <div class="small fw-normal text-white-50 mt-1">Akses Penuh (Keuangan, Laporan, Buat Jadwal)</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5 d-none" id="mainContainer">
   <!-- Nav Tabs -->
   <ul class="nav nav-pills nav-justified mb-4" id="pills-tab">
     <li class="nav-item">
-      <button class="nav-link active" onclick="switchTab('content-absensi', this)"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
+      <button class="nav-link active" id="tabBtnAbsensi" onclick="switchTab('content-absensi', this)"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" onclick="switchTab('content-teknisi', this)"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
+      <button class="nav-link" id="tabBtnTeknisi" onclick="switchTab('content-teknisi', this)"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="switchTab('content-keuangan', this)"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
+    <li class="nav-item role-admin-only">
+      <button class="nav-link" id="tabBtnKeuangan" onclick="switchTab('content-keuangan', this)"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="switchTab('content-laporan', this)"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
+    <li class="nav-item role-admin-only">
+      <button class="nav-link" id="tabBtnLaporan" onclick="switchTab('content-laporan', this)"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
     </li>
   </ul>
 
   <div class="tab-content">
     
-    <!-- TAB 1: ABSENSI -->
+    <!-- TAB 1: ABSENSI (TEKNISI & ADMIN) -->
     <div class="tab-content-item active" id="content-absensi">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i>Absensi Harian Karyawan</h5>
@@ -60,9 +87,8 @@
             </select>
           </div>
 
-          <!-- Keterangan Absen (Muncul jika pilih Sakit / Izin / Masuk Opsional) -->
           <div class="mb-3" id="secKetAbsen">
-            <label class="form-label" id="lblKetAbsen">Keterangan / Alasan</label>
+            <label class="form-label" id="lblKetAbsen">Keterangan / Alasan (Opsional)</label>
             <textarea id="absenKeterangan" class="form-control" rows="2" placeholder="Sebutkan alasan izin/sakit atau catatan tambahan..."></textarea>
           </div>
 
@@ -73,7 +99,8 @@
 
     <!-- TAB 2: TRACKER TEKNISI & ESTIMASI WAKTU -->
     <div class="tab-content-item" id="content-teknisi">
-      <div class="card card-custom p-4 mb-4">
+      <!-- KHUSUS ADMIN: INPUT JADWAL PEKERJAAN -->
+      <div class="card card-custom p-4 mb-4 role-admin-only" id="cardCreateJob">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Input Pekerjaan Visit Baru (Admin)</h5>
         <form id="formJob">
           <div class="row g-2">
@@ -94,8 +121,9 @@
         </form>
       </div>
 
+      <!-- AKSESTABLE UNTUK TEKNISI & ADMIN: UPDATE STATUS PEKERJAAN -->
       <div class="card card-custom p-4">
-        <h5 class="fw-bold mb-3"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan (Teknisi)</h5>
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan</h5>
         <form id="formStatusJob">
           <div class="mb-3">
             <label class="form-label">ID Pekerjaan (JOB ID)</label>
@@ -115,8 +143,8 @@
       </div>
     </div>
 
-    <!-- TAB 3: PENCATATAN KEUANGAN -->
-    <div class="tab-content-item" id="content-keuangan">
+    <!-- TAB 3: PENCATATAN KEUANGAN (KHUSUS ADMIN) -->
+    <div class="tab-content-item role-admin-only" id="content-keuangan">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-success me-2"></i>Catat Pemasukan / Pengeluaran</h5>
         <form id="formKeuangan">
@@ -168,8 +196,8 @@
       </div>
     </div>
 
-    <!-- TAB 4: LAPORAN & ESTIMASI -->
-    <div class="tab-content-item" id="content-laporan">
+    <!-- TAB 4: LAPORAN & ESTIMASI (KHUSUS ADMIN) -->
+    <div class="tab-content-item role-admin-only" id="content-laporan">
       <div class="card card-custom p-4 mb-4 bg-white border-top border-primary border-4">
         <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-file-csv text-primary me-2"></i>Download Rekap Laporan Keuangan</h5>
         <div class="row g-2 align-items-center">
@@ -227,8 +255,47 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   let activeJobsList = [];
+  let currentRole = localStorage.getItem("app_role") || "";
+  let roleModalObj = new bootstrap.Modal(document.getElementById('roleModal'));
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!currentRole) {
+      roleModalObj.show();
+    } else {
+      applyRolePermissions(currentRole);
+    }
+  });
+
+  function setRole(role) {
+    currentRole = role;
+    localStorage.setItem("app_role", role);
+    roleModalObj.hide();
+    applyRolePermissions(role);
+  }
+
+  function switchRole() {
+    localStorage.removeItem("app_role");
+    location.reload();
+  }
+
+  function applyRolePermissions(role) {
+    document.getElementById("mainContainer").classList.remove("d-none");
+    document.getElementById("userInfo").classList.remove("d-none");
+    document.getElementById("userRoleBadge").innerText = "Role: " + role;
+
+    if (role === "TEKNISI") {
+      // Sembunyikan elemen khusus Admin
+      document.querySelectorAll(".role-admin-only").forEach(el => el.classList.add("role-hide"));
+      // Pastikan tab default aktif di Absensi
+      switchTab('content-absensi', document.getElementById('tabBtnAbsensi'));
+    } else {
+      // Tampilkan seluruh elemen untuk Admin
+      document.querySelectorAll(".role-admin-only").forEach(el => el.classList.remove("role-hide"));
+    }
+  }
 
   function switchTab(targetId, btnElement) {
     document.querySelectorAll('.tab-content-item').forEach(el => {
