@@ -10,6 +10,8 @@
     body { background-color: #f4f6f9; font-family: sans-serif; }
     .card-custom { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .btn-action { min-height: 48px; font-weight: bold; border-radius: 10px; }
+    .tab-content-item { display: none; }
+    .tab-content-item.active { display: block; }
   </style>
 </head>
 <body>
@@ -22,25 +24,25 @@
 
 <div class="container pb-5">
   <!-- Nav Tabs -->
-  <ul class="nav nav-pills nav-justified mb-4" id="pills-tab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="tab-absensi" data-bs-toggle="pill" data-bs-target="#content-absensi" type="button" role="tab"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
+  <ul class="nav nav-pills nav-justified mb-4" id="pills-tab">
+    <li class="nav-item">
+      <button class="nav-link active" onclick="switchTab('content-absensi', this)"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-teknisi" data-bs-toggle="pill" data-bs-target="#content-teknisi" type="button" role="tab"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
+    <li class="nav-item">
+      <button class="nav-link" onclick="switchTab('content-teknisi', this)"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-keuangan" data-bs-toggle="pill" data-bs-target="#content-keuangan" type="button" role="tab"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
+    <li class="nav-item">
+      <button class="nav-link" onclick="switchTab('content-keuangan', this)"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-laporan" data-bs-toggle="pill" data-bs-target="#content-laporan" type="button" role="tab"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
+    <li class="nav-item">
+      <button class="nav-link" onclick="switchTab('content-laporan', this)"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
     </li>
   </ul>
 
-  <div class="tab-content" id="pills-tabContent">
+  <div class="tab-content">
     
     <!-- TAB 1: ABSENSI -->
-    <div class="tab-pane fade show active" id="content-absensi" role="tabpanel">
+    <div class="tab-content-item active" id="content-absensi">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i>Absensi Harian Karyawan</h5>
         <form id="formAbsen">
@@ -60,8 +62,8 @@
       </div>
     </div>
 
-    <!-- TAB 2: TRACKER TEKNISI & ETIMASI WAKTU -->
-    <div class="tab-pane fade" id="content-teknisi" role="tabpanel">
+    <!-- TAB 2: TRACKER TEKNISI & ESTIMASI WAKTU -->
+    <div class="tab-content-item" id="content-teknisi">
       <div class="card card-custom p-4 mb-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Input Pekerjaan Visit Baru (Admin)</h5>
         <form id="formJob">
@@ -105,7 +107,7 @@
     </div>
 
     <!-- TAB 3: PENCATATAN KEUANGAN -->
-    <div class="tab-pane fade" id="content-keuangan" role="tabpanel">
+    <div class="tab-content-item" id="content-keuangan">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-success me-2"></i>Catat Pemasukan / Pengeluaran</h5>
         <form id="formKeuangan">
@@ -134,7 +136,7 @@
     </div>
 
     <!-- TAB 4: LAPORAN & ESTIMASI -->
-    <div class="tab-pane fade" id="content-laporan" role="tabpanel">
+    <div class="tab-content-item" id="content-laporan">
       <div class="row g-3">
         <div class="col-md-4">
           <div class="card card-custom p-3 bg-white border-start border-success border-4">
@@ -176,26 +178,30 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/bootstrap.bundle.min.js"></script>
 <script>
-  // Inisialisasi Event Switch Tab Bootstrap Manual
-  document.addEventListener("DOMContentLoaded", () => {
-    const triggerTabList = document.querySelectorAll('#pills-tab button');
-    triggerTabList.forEach(triggerEl => {
-      triggerEl.addEventListener('click', event => {
-        event.preventDefault();
-        const tabTrigger = new bootstrap.Tab(triggerEl);
-        tabTrigger.show();
-
-        // Jika tab Laporan diklik, panggil API pemuatan data laporan
-        if (triggerEl.id === 'tab-laporan') {
-          loadReport();
-        }
-      });
+  // Fungsi Pindah Tab Native JavaScript (Dijamin 100% Bisa Diklik)
+  function switchTab(targetId, btnElement) {
+    // Sembunyikan semua konten tab
+    document.querySelectorAll('.tab-content-item').forEach(el => {
+      el.classList.remove('active');
     });
-  });
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxXhpE11DsZnjgHsrqdrxba8qQctYFJ-DTPkHjxg4O_UEQXrn6rzqUm4dpQej5sG10ntw/exec";
+    // Nonaktifkan semua tombol nav
+    document.querySelectorAll('#pills-tab .nav-link').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Tampilkan tab yang dipilih
+    document.getElementById(targetId).classList.add('active');
+    btnElement.classList.add('active');
+
+    // Jika tab Laporan diklik, muat data laporan
+    if (targetId === 'content-laporan') {
+      loadReport();
+    }
+  }
+
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwaW1mGI4XZV40iZvxKhHL23p3pah1qrIEzQJ_YMaqP5kqAFSHSQ8f4He0o_YuFnQmgEQ/exec";
 
   async function postData(action, data) {
     try {
