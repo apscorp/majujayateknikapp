@@ -86,7 +86,7 @@
 
   <div class="tab-content">
     
-    <!-- TAB 1: ABSENSI (TEKNISI & ADMIN) -->
+    <!-- TAB 1: ABSENSI -->
     <div class="tab-content-item active" id="content-absensi">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i>Absensi Harian Karyawan</h5>
@@ -107,7 +107,7 @@
 
           <div class="mb-3" id="secKetAbsen">
             <label class="form-label" id="lblKetAbsen">Keterangan / Alasan (Opsional)</label>
-            <textarea id="absenKeterangan" class="form-control" rows="2" placeholder="Sebutkan alasan izin/sakit atau catatan tambahan..."></textarea>
+            <textarea id="absenKeterangan" class="form-control" rows="2" placeholder="Sebutkan alasan izin/sakit..."></textarea>
           </div>
 
           <button type="submit" class="btn btn-primary w-100 btn-action"><i class="fa-solid fa-paper-plane me-2"></i>Kirim Absensi</button>
@@ -115,24 +115,32 @@
       </div>
     </div>
 
-    <!-- TAB 2: TRACKER TEKNISI & ESTIMASI WAKTU -->
+    <!-- TAB 2: TRACKER TEKNISI -->
     <div class="tab-content-item" id="content-teknisi">
-      <!-- KHUSUS ADMIN: INPUT JADWAL PEKERJAAN -->
+      <!-- INPUT JADWAL PEKERJAAN (ADMIN) -->
       <div class="card card-custom p-4 mb-4 role-admin-only" id="cardCreateJob">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Input Pekerjaan Visit Baru (Admin)</h5>
         <form id="formJob">
           <div class="row g-2">
             <div class="col-md-6 mb-2">
+              <label class="form-label small fw-bold">Tanggal Jadwal Visit</label>
+              <input type="date" id="jobTglJadwal" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label class="form-label small fw-bold">Teknisi</label>
               <input type="text" id="jobTeknisi" class="form-control" placeholder="Nama Teknisi" required>
             </div>
             <div class="col-md-6 mb-2">
+              <label class="form-label small fw-bold">Nama Customer</label>
               <input type="text" id="jobCustomer" class="form-control" placeholder="Nama Customer" required>
             </div>
-            <div class="col-12 mb-2">
-              <input type="text" id="jobAlamat" class="form-control" placeholder="Alamat Customer" required>
+            <div class="col-md-6 mb-2">
+              <label class="form-label small fw-bold">Jenis Pekerjaan</label>
+              <input type="text" id="jobJenis" class="form-control" placeholder="Servis AC / Isi Freon" required>
             </div>
             <div class="col-12 mb-3">
-              <input type="text" id="jobJenis" class="form-control" placeholder="Jenis Pekerjaan (Servis AC / Isi Freon / Kulkas)" required>
+              <label class="form-label small fw-bold">Alamat Lengkap</label>
+              <input type="text" id="jobAlamat" class="form-control" placeholder="Alamat Customer" required>
             </div>
           </div>
           <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-plus me-2"></i>Buat Jadwal Visit</button>
@@ -142,18 +150,21 @@
       <!-- UPDATE STATUS PEKERJAAN (TEKNISI & ADMIN) -->
       <div class="card card-custom p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold m-0"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan</h5>
+          <div>
+            <h5 class="fw-bold m-0"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan</h5>
+            <small class="text-muted">Diurutkan berdasarkan jadwal terdekat / pendingan lampau</small>
+          </div>
           <button class="btn btn-sm btn-outline-secondary" onclick="loadActiveJobs()"><i class="fa-solid fa-rotate me-1"></i>Refresh List</button>
         </div>
         <form id="formStatusJob">
           <div class="mb-3">
-            <label class="form-label">Pilih Pekerjaan / Customer (Aktif)</label>
+            <label class="form-label fw-bold">Pilih Pekerjaan / Customer (Aktif)</label>
             <select id="statusJobId" class="form-select" required>
               <option value="">-- Loading daftar pekerjaan... --</option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Aksi Status</label>
+            <label class="form-label fw-bold">Aksi Status</label>
             <select id="statusAction" class="form-select" required>
               <option value="BERANGKAT">1. Berangkat dari Toko/Customer Sebelumnya</option>
               <option value="TIBA">2. Tiba di Lokasi Customer</option>
@@ -166,7 +177,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: PENCATATAN KEUANGAN (KHUSUS ADMIN) -->
+    <!-- TAB 3: PENCATATAN KEUANGAN (ADMIN) -->
     <div class="tab-content-item role-admin-only" id="content-keuangan">
       <div class="card card-custom p-4">
         <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-success me-2"></i>Catat Pemasukan / Pengeluaran</h5>
@@ -219,7 +230,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: LAPORAN & ESTIMASI (KHUSUS ADMIN) -->
+    <!-- TAB 4: LAPORAN (ADMIN) -->
     <div class="tab-content-item role-admin-only" id="content-laporan">
       <div class="card card-custom p-4 mb-4 bg-white border-top border-primary border-4">
         <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-file-csv text-primary me-2"></i>Download Rekap Laporan Keuangan</h5>
@@ -261,7 +272,7 @@
           <div class="card card-custom p-4 bg-white">
             <h6 class="fw-bold text-secondary"><i class="fa-solid fa-route me-2"></i>Rata-Rata Perjalanan</h6>
             <h2 class="fw-bold text-dark mt-2" id="repAvgJalan">0 <small class="fs-6">Menit</small></h2>
-            <small class="text-muted">Diukur dari keberangkatan hingga sampai di tempat customer.</small>
+            <small class="text-muted">Diukur dari keberangkatan hingga sampai lokasi customer.</small>
           </div>
         </div>
 
@@ -269,7 +280,7 @@
           <div class="card card-custom p-4 bg-white">
             <h6 class="fw-bold text-secondary"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Rata-Rata Pengerjaan</h6>
             <h2 class="fw-bold text-dark mt-2" id="repAvgKerja">0 <small class="fs-6">Menit</small></h2>
-            <small class="text-muted">Diukur dari awal teknisi mulai hingga pengerjaan selesai.</small>
+            <small class="text-muted">Diukur dari awal teknisi mulai hingga pekerjaan selesai.</small>
           </div>
         </div>
       </div>
@@ -287,6 +298,10 @@
   let adminAuthModalObj = new bootstrap.Modal(document.getElementById('adminAuthModal'));
 
   window.addEventListener('DOMContentLoaded', () => {
+    // Set default tanggal hari ini pada input jadwal visit
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById("jobTglJadwal").value = todayStr;
+
     if (!currentRole) {
       roleModalObj.show();
     } else {
@@ -344,13 +359,8 @@
   }
 
   function switchTab(targetId, btnElement) {
-    document.querySelectorAll('.tab-content-item').forEach(el => {
-      el.classList.remove('active');
-    });
-
-    document.querySelectorAll('#pills-tab .nav-link').forEach(btn => {
-      btn.classList.remove('active');
-    });
+    document.querySelectorAll('.tab-content-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#pills-tab .nav-link').forEach(btn => btn.classList.remove('active'));
 
     document.getElementById(targetId).classList.add('active');
     btnElement.classList.add('active');
@@ -362,7 +372,7 @@
     }
   }
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxe4aE6-VgPbvsNoLqRjc23lu9rig5ni5XbbJj5B5_L51DZMZYKZ3BVyvftuV9SznN67Q/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbz15dQKtsXxUMW6rPAOCOjupP08zeV8fD8wt6qNj9_w9wyw5WbmM3sIHL55_82BPLp7Dw/exec";
 
   async function postData(action, data) {
     try {
@@ -404,7 +414,31 @@
     e.target.reset();
   });
 
-  // Load Active Jobs (Hanya menampilkan yang BELUM SELESAI)
+  // Helper Format Label Waktu Jadwal
+  function getScheduleTag(tglJadwalStr) {
+    if (!tglJadwalStr) return "[TGL UNKNOWN]";
+    
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const targetDate = new Date(tglJadwalStr);
+    targetDate.setHours(0,0,0,0);
+
+    const diffTime = targetDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return "[⚠️ OVERDUE]"; // Pendingan dari hari lampau
+    } else if (diffDays === 0) {
+      return "[HARI INI]";
+    } else if (diffDays === 1) {
+      return "[BESOK]";
+    } else {
+      return `[${tglJadwalStr}]`;
+    }
+  }
+
+  // Load Active Jobs
   async function loadActiveJobs() {
     const res = await postData("get_active_jobs", {});
     const selectStatusJob = document.getElementById("statusJobId");
@@ -413,17 +447,19 @@
     if (res && res.status === "success" && res.data.length > 0) {
       activeJobsList = res.data;
       
-      // Dropdown Update Status Pekerjaan
-      selectStatusJob.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
-      activeJobsList.forEach(j => {
-        selectStatusJob.innerHTML += `<option value="${j.id_job}">${j.customer} - ${j.jenis} (${j.id_job})</option>`;
+      selectStatusJob.innerHTML = '<option value="">-- Pilih Pekerjaan (Sesuai Urutan Prioritas) --</option>';
+      activeJobsList.forEach((j, index) => {
+        const queueNum = index + 1;
+        const tag = getScheduleTag(j.tgl_jadwal);
+        selectStatusJob.innerHTML += `<option value="${j.id_job}">#${queueNum} ${tag} [${j.teknisi}] ${j.customer} - ${j.jenis} (${j.id_job})</option>`;
       });
 
-      // Dropdown Keuangan
       if (selectKeuJob) {
         selectKeuJob.innerHTML = '<option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>';
-        activeJobsList.forEach(j => {
-          selectKeuJob.innerHTML += `<option value="${j.id_job}">${j.id_job} - ${j.customer} (${j.jenis})</option>`;
+        activeJobsList.forEach((j, index) => {
+          const queueNum = index + 1;
+          const tag = getScheduleTag(j.tgl_jadwal);
+          selectKeuJob.innerHTML += `<option value="${j.id_job}">#${queueNum} ${tag} [${j.teknisi}] ${j.id_job} - ${j.customer}</option>`;
         });
       }
     } else {
@@ -462,7 +498,7 @@
     e.preventDefault();
     const res = await postData("update_job_status", {
       status_action: "CREATE",
-      id_teknisi: document.getElementById("jobTeknisi").value,
+      tgl_jadwal: document.getElementById("jobTglJadwal").value,
       nama_teknisi: document.getElementById("jobTeknisi").value,
       nama_customer: document.getElementById("jobCustomer").value,
       alamat: document.getElementById("jobAlamat").value,
@@ -470,6 +506,9 @@
     });
     if (res) alert(res.message);
     e.target.reset();
+    
+    // Reset tanggal ke hari ini
+    document.getElementById("jobTglJadwal").value = new Date().toISOString().split('T')[0];
     loadActiveJobs();
   });
 
@@ -486,12 +525,11 @@
 
     if (res) {
       alert(res.message);
-      // Otomatis refresh dropdown agar pekerjaan yang SELESAI langsung hilang dari list
       loadActiveJobs();
     }
   });
 
-  // Input Keuangan (Admin)
+  // Input Keuangan
   document.getElementById("formKeuangan").addEventListener("submit", async (e) => {
     e.preventDefault();
     const res = await postData("add_keuangan", {
