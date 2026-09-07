@@ -137,6 +137,23 @@
 
     <!-- TAB 4: LAPORAN & ESTIMASI -->
     <div class="tab-content-item" id="content-laporan">
+      <!-- WIDGET DOWNLOAD LAPORAN -->
+      <div class="card card-custom p-4 mb-4 bg-white border-top border-primary border-4">
+        <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-file-csv text-primary me-2"></i>Download Rekap Laporan Keuangan</h5>
+        <div class="row g-2 align-items-center">
+          <div class="col-md-8">
+            <select id="dlPeriode" class="form-select">
+              <option value="HARIAN">Laporan Hari Ini</option>
+              <option value="MINGGUAN">Laporan 7 Hari Terakhir (Mingguan)</option>
+              <option value="BULANAN">Laporan 30 Hari Terakhir (Bulanan)</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-primary w-100 font-weight-bold" onclick="downloadReport()"><i class="fa-solid fa-download me-2"></i>Download CSV/Excel</button>
+          </div>
+        </div>
+      </div>
+
       <div class="row g-3">
         <div class="col-md-4">
           <div class="card card-custom p-3 bg-white border-start border-success border-4">
@@ -179,29 +196,24 @@
 </div>
 
 <script>
-  // Fungsi Pindah Tab Native JavaScript (Dijamin 100% Bisa Diklik)
   function switchTab(targetId, btnElement) {
-    // Sembunyikan semua konten tab
     document.querySelectorAll('.tab-content-item').forEach(el => {
       el.classList.remove('active');
     });
 
-    // Nonaktifkan semua tombol nav
     document.querySelectorAll('#pills-tab .nav-link').forEach(btn => {
       btn.classList.remove('active');
     });
 
-    // Tampilkan tab yang dipilih
     document.getElementById(targetId).classList.add('active');
     btnElement.classList.add('active');
 
-    // Jika tab Laporan diklik, muat data laporan
     if (targetId === 'content-laporan') {
       loadReport();
     }
   }
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwaW1mGI4XZV40iZvxKhHL23p3pah1qrIEzQJ_YMaqP5kqAFSHSQ8f4He0o_YuFnQmgEQ/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyCiwr44nHuflzn_spTaqqLXpak1Fzz1e8B_W-5C1qWxUeshscW5AQVbfIAfSt0-oxixA/exec";
 
   async function postData(action, data) {
     try {
@@ -242,7 +254,7 @@
     e.target.reset();
   });
 
-  // Update Status Job (Teknisi Tracker)
+  // Update Status Job
   document.getElementById("formStatusJob").addEventListener("submit", async (e) => {
     e.preventDefault();
     const res = await postData("update_job_status", {
@@ -275,6 +287,25 @@
       document.getElementById("repSaldo").innerText = "Rp " + Number(d.saldo).toLocaleString('id-ID');
       document.getElementById("repAvgJalan").innerHTML = d.avg_durasi_perjalanan_menit + ' <small class="fs-6">Menit</small>';
       document.getElementById("repAvgKerja").innerHTML = d.avg_durasi_pengerjaan_menit + ' <small class="fs-6">Menit</small>';
+    }
+  }
+
+  // Fungsi Download File Laporan CSV
+  async function downloadReport() {
+    const period = document.getElementById("dlPeriode").value;
+    const res = await postData("download_report", { period: period });
+    
+    if (res && res.status === "success") {
+      const blob = new Blob([res.csv_data], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", res.filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      alert("Gagal mengunduh laporan.");
     }
   }
 </script>
