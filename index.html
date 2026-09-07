@@ -113,21 +113,47 @@
         <form id="formKeuangan">
           <div class="mb-3">
             <label class="form-label">Tipe Transaksi</label>
-            <select id="keuTipe" class="form-select" required>
+            <select id="keuTipe" class="form-select" onchange="toggleJobRefSection()" required>
               <option value="Pemasukan">Pemasukan</option>
               <option value="Pengeluaran">Pengeluaran</option>
             </select>
           </div>
+
+          <!-- Pilihan Sinkronisasi ID Pekerjaan -->
+          <div class="mb-3" id="secJobRef">
+            <label class="form-label fw-bold text-primary"><i class="fa-solid fa-link me-1"></i>Pilih Pekerjaan (JOB ID)</label>
+            <select id="keuJobRef" class="form-select" onchange="autoFillCategory()">
+              <option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>
+            </select>
+          </div>
+
           <div class="mb-3">
             <label class="form-label">Kategori</label>
             <input type="text" id="keuKategori" class="form-control" placeholder="Service AC / Beli Freon / Bensin / Gaji" required>
           </div>
+
+          <!-- Rincian Biaya Jasa & Sparepart untuk Pemasukan Job -->
+          <div id="secRincianBiaya" class="p-3 mb-3 bg-light rounded border">
+            <div class="fw-bold mb-2 text-secondary"><i class="fa-solid fa-receipt me-1"></i>Rincian Biaya Pemasukan</div>
+            <div class="row g-2">
+              <div class="col-md-6 mb-2">
+                <label class="form-label small">Biaya Jasa (Rp)</label>
+                <input type="number" id="keuJasa" class="form-control" placeholder="100000" oninput="calcTotalBiaya()">
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label small">Biaya Sparepart / Produk (Rp)</label>
+                <input type="number" id="keuSparepart" class="form-control" placeholder="50000" oninput="calcTotalBiaya()">
+              </div>
+            </div>
+          </div>
+
           <div class="mb-3">
-            <label class="form-label">Jumlah (Rp)</label>
+            <label class="form-label fw-bold">Total Jumlah (Rp)</label>
             <input type="number" id="keuJumlah" class="form-control" placeholder="150000" required>
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Keterangan</label>
+            <label class="form-label">Keterangan / Catatan</label>
             <textarea id="keuKeterangan" class="form-control" rows="2" placeholder="Catatan opsional..."></textarea>
           </div>
           <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-floppy-disk me-2"></i>Simpan Transaksi</button>
@@ -137,7 +163,6 @@
 
     <!-- TAB 4: LAPORAN & ESTIMASI -->
     <div class="tab-content-item" id="content-laporan">
-      <!-- WIDGET DOWNLOAD LAPORAN -->
       <div class="card card-custom p-4 mb-4 bg-white border-top border-primary border-4">
         <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-file-csv text-primary me-2"></i>Download Rekap Laporan Keuangan</h5>
         <div class="row g-2 align-items-center">
@@ -196,6 +221,8 @@
 </div>
 
 <script>
+  let activeJobsList = [];
+
   function switchTab(targetId, btnElement) {
     document.querySelectorAll('.tab-content-item').forEach(el => {
       el.classList.remove('active');
@@ -208,12 +235,14 @@
     document.getElementById(targetId).classList.add('active');
     btnElement.classList.add('active');
 
-    if (targetId === 'content-laporan') {
+    if (targetId === 'content-keuangan') {
+      loadActiveJobs();
+    } else if (targetId === 'content-laporan') {
       loadReport();
     }
   }
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbyCiwr44nHuflzn_spTaqqLXpak1Fzz1e8B_W-5C1qWxUeshscW5AQVbfIAfSt0-oxixA/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxugXEDshzZwVp2MZfA9kRr7zjFi33WR73ROhYIYD9ZwAvXWGs-4n81LUrVFCO-EiGYeA/exec";
 
   async function postData(action, data) {
     try {
@@ -225,6 +254,44 @@
     } catch (e) {
       alert("Gagal terhubung ke database!");
       console.error(e);
+    }
+  }
+
+  // Load Daftar Pekerjaan untuk Keuangan
+  async function loadActiveJobs() {
+    const res = await postData("get_active_jobs", {});
+    if (res && res.status === "success") {
+      activeJobsList = res.data;
+      const selectEl = document.getElementById("keuJobRef");
+      selectEl.innerHTML = '<option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>';
+      activeJobsList.forEach(j => {
+        selectEl.innerHTML += `<option value="${j.id_job}">${j.id_job} - ${j.customer} (${j.jenis})</option>`;
+      });
+    }
+  }
+
+  function autoFillCategory() {
+    const selectedJobId = document.getElementById("keuJobRef").value;
+    const found = activeJobsList.find(j => j.id_job === selectedJobId);
+    if (found) {
+      document.getElementById("keuKategori").value = found.jenis;
+    }
+  }
+
+  function calcTotalBiaya() {
+    const jasa = Number(document.getElementById("keuJasa").value) || 0;
+    const sparepart = Number(document.getElementById("keuSparepart").value) || 0;
+    if (jasa > 0 || sparepart > 0) {
+      document.getElementById("keuJumlah").value = jasa + sparepart;
+    }
+  }
+
+  function toggleJobRefSection() {
+    const tipe = document.getElementById("keuTipe").value;
+    if (tipe === "Pengeluaran") {
+      document.getElementById("secRincianBiaya").style.display = "none";
+    } else {
+      document.getElementById("secRincianBiaya").style.display = "block";
     }
   }
 
@@ -271,7 +338,10 @@
       tipe: document.getElementById("keuTipe").value,
       kategori: document.getElementById("keuKategori").value,
       jumlah: document.getElementById("keuJumlah").value,
-      keterangan: document.getElementById("keuKeterangan").value
+      keterangan: document.getElementById("keuKeterangan").value,
+      id_job_ref: document.getElementById("keuJobRef").value,
+      biaya_jasa: document.getElementById("keuJasa").value,
+      biaya_sparepart: document.getElementById("keuSparepart").value
     });
     if (res) alert(res.message);
     e.target.reset();
@@ -290,7 +360,7 @@
     }
   }
 
-  // Fungsi Download File Laporan CSV
+  // Download Laporan
   async function downloadReport() {
     const period = document.getElementById("dlPeriode").value;
     const res = await postData("download_report", { period: period });
