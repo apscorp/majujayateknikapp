@@ -147,7 +147,7 @@
         </div>
         <form id="formStatusJob">
           <div class="mb-3">
-            <label class="form-label">Pilih Pekerjaan / Customer</label>
+            <label class="form-label">Pilih Pekerjaan / Customer (Aktif)</label>
             <select id="statusJobId" class="form-select" required>
               <option value="">-- Loading daftar pekerjaan... --</option>
             </select>
@@ -362,7 +362,7 @@
     }
   }
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzW97UJf4b3lNiDRbSmmPbbYtIm_2d-i5ah5KTvwbjq7DzF4HBj3qAqAjwaKQv6bQ3QhQ/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxdFThrNa28WmuJMcwU8GDikSUBFtB7ZHnHJ2Zz8fg9Ki5BmucZLy8cbUYJoOxrucJjyg/exec";
 
   async function postData(action, data) {
     try {
@@ -391,7 +391,7 @@
     }
   }
 
-  // Absensi Form
+  // Form Absensi
   document.getElementById("formAbsen").addEventListener("submit", async (e) => {
     e.preventDefault();
     const res = await postData("absen", {
@@ -404,7 +404,7 @@
     e.target.reset();
   });
 
-  // Load Active Jobs untuk Dropdown Teknisi dan Keuangan
+  // Load Active Jobs (Hanya menampilkan yang BELUM SELESAI)
   async function loadActiveJobs() {
     const res = await postData("get_active_jobs", {});
     const selectStatusJob = document.getElementById("statusJobId");
@@ -413,13 +413,13 @@
     if (res && res.status === "success" && res.data.length > 0) {
       activeJobsList = res.data;
       
-      // Populate Dropdown Update Status Teknisi
+      // Dropdown Update Status Pekerjaan
       selectStatusJob.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
       activeJobsList.forEach(j => {
         selectStatusJob.innerHTML += `<option value="${j.id_job}">${j.customer} - ${j.jenis} (${j.id_job})</option>`;
       });
 
-      // Populate Dropdown Referensi Keuangan
+      // Dropdown Keuangan
       if (selectKeuJob) {
         selectKeuJob.innerHTML = '<option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>';
         activeJobsList.forEach(j => {
@@ -470,17 +470,25 @@
     });
     if (res) alert(res.message);
     e.target.reset();
-    loadActiveJobs(); // Reload daftar job setelah buat baru
+    loadActiveJobs();
   });
 
   // Update Status Job (Teknisi)
   document.getElementById("formStatusJob").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const selectedJob = document.getElementById("statusJobId").value;
+    const actionStatus = document.getElementById("statusAction").value;
+
     const res = await postData("update_job_status", {
-      id_job: document.getElementById("statusJobId").value,
-      status_action: document.getElementById("statusAction").value
+      id_job: selectedJob,
+      status_action: actionStatus
     });
-    if (res) alert(res.message);
+
+    if (res) {
+      alert(res.message);
+      // Otomatis refresh dropdown agar pekerjaan yang SELESAI langsung hilang dari list
+      loadActiveJobs();
+    }
   });
 
   // Input Keuangan (Admin)
