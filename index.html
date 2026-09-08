@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Operasional & Keuangan</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Library SheetJS untuk Export File Excel Asli (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     body { background-color: #f8f9fa; }
     .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -104,9 +106,9 @@
           </div>
         </div>
 
-        <!-- Section Tabel Tracker (Job Berlangsung & Semua Job Aktif) -->
+        <!-- Section Tabel Tracker -->
         <div class="col-md-8" id="sec-tracker-tables">
-          <!-- TABEL 1: PEKERJAAN SEDANG BERLANGSUNG -->
+          <!-- Pekerjaan Berlangsung -->
           <div class="card p-4 mb-4 border-warning">
             <h5 class="card-title fw-bold text-warning-emphasis mb-3">⚡ Pekerjaan Sedang Berlangsung</h5>
             <div class="table-responsive">
@@ -126,7 +128,7 @@
             </div>
           </div>
 
-          <!-- TABEL 2: SEMUA JADWAL JOB AKTIF -->
+          <!-- Semua Job Aktif -->
           <div class="card p-4">
             <h5 class="card-title fw-bold mb-3">📋 Semua Daftar Job Aktif</h5>
             <div class="table-responsive">
@@ -225,27 +227,54 @@
           </div>
         </div>
 
-        <h6 class="fw-bold mb-2">Download Rekap Laporan Keuangan (CSV)</h6>
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-secondary" onclick="downloadCSV('HARIAN')">Rekap Harian</button>
-          <button class="btn btn-outline-secondary" onclick="downloadCSV('MINGGUAN')">Rekap Mingguan</button>
-          <button class="btn btn-outline-secondary" onclick="downloadCSV('BULANAN')">Rekap Bulanan</button>
+        <div class="row g-4">
+          <!-- Download Excel Keuangan -->
+          <div class="col-md-6">
+            <div class="border rounded p-3 bg-light">
+              <h6 class="fw-bold mb-2">📊 Download Laporan Keuangan (.xlsx)</h6>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-success" onclick="downloadExcel('KEUANGAN', 'HARIAN')">Harian</button>
+                <button class="btn btn-sm btn-outline-success" onclick="downloadExcel('KEUANGAN', 'MINGGUAN')">Mingguan</button>
+                <button class="btn btn-sm btn-outline-success" onclick="downloadExcel('KEUANGAN', 'BULANAN')">Bulanan</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download Excel Pekerjaan -->
+          <div class="col-md-6">
+            <div class="border rounded p-3 bg-light">
+              <h6 class="fw-bold mb-2">🔧 Download Laporan Pekerjaan/Visit (.xlsx)</h6>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="downloadExcel('PEKERJAAN', 'HARIAN')">Harian</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="downloadExcel('PEKERJAAN', 'MINGGUAN')">Mingguan</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="downloadExcel('PEKERJAAN', 'BULANAN')">Bulanan</button>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- Modal Pemilih Role -->
+<!-- Modal Pemilih Role & Password Admin -->
 <div class="modal fade" id="roleModal" data-bs-backdrop="static" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center p-4">
       <h4 class="fw-bold mb-3">Pilih Hak Akses Anda</h4>
-      <p class="text-muted mb-4">Silakan pilih opsi akses aplikasi sesuai tugas Anda:</p>
-      <div class="d-grid gap-3">
-        <button class="btn btn-outline-primary btn-lg fw-bold" onclick="setRole('TEKNISI')">Teknisi (Absensi & Update Job)</button>
-        <button class="btn btn-primary btn-lg fw-bold" onclick="setRole('ADMIN')">Admin (Akses Penuh)</button>
+      <p class="text-muted mb-3">Silakan pilih opsi akses aplikasi sesuai tugas Anda:</p>
+      
+      <div id="pinSection" class="mb-3 d-none">
+        <label class="form-label text-danger fw-bold">Masukkan PIN Admin:</label>
+        <input type="password" id="adminPin" class="form-control text-center mx-auto mb-2" style="max-width: 200px;" placeholder="••••••">
+        <button class="btn btn-danger btn-sm mb-3" onclick="verifyAdminPin()">Verifikasi PIN Admin</button>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button class="btn btn-outline-primary btn-lg fw-bold" onclick="selectRole('TEKNISI')">Teknisi (Absensi & Update Job)</button>
+        <button class="btn btn-primary btn-lg fw-bold" onclick="showAdminPinInput()">Admin (Akses Penuh)</button>
       </div>
     </div>
   </div>
@@ -253,7 +282,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxkPlXTLjQ9nTsVtrjYSBTiheNrxyoGP3dydolGfvOA856SEPM0pbOasUw_dN9zJzffgA/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLQr9l1nyCVEHPGI_aFcwsR6HUypzuYEQVt-285kyyDmd7eT9XrTaBQxog6cGkum-vLw/exec";
+  const ADMIN_PIN = "890890";
   let currentRole = localStorage.getItem("app_role") || "";
   let roleModalObj = null;
 
@@ -268,7 +298,24 @@
     document.getElementById("tglJadwal").value = new Date().toISOString().split('T')[0];
   });
 
-  function setRole(role) {
+  function showAdminPinInput() {
+    document.getElementById("pinSection").classList.remove("d-none");
+    document.getElementById("adminPin").focus();
+  }
+
+  function verifyAdminPin() {
+    let pinInput = document.getElementById("adminPin").value;
+    if (pinInput === ADMIN_PIN) {
+      document.getElementById("pinSection").classList.add("d-none");
+      document.getElementById("adminPin").value = "";
+      selectRole('ADMIN');
+    } else {
+      alert("PIN Admin Salah!");
+      document.getElementById("adminPin").value = "";
+    }
+  }
+
+  function selectRole(role) {
     currentRole = role;
     localStorage.setItem("app_role", role);
     if (roleModalObj) roleModalObj.hide();
@@ -276,6 +323,7 @@
   }
 
   function switchRole() {
+    document.getElementById("pinSection").classList.add("d-none");
     roleModalObj.show();
   }
 
@@ -287,21 +335,16 @@
       badge.className = "badge bg-info text-dark role-badge me-2";
       document.getElementById("nav-item-keuangan").style.display = "none";
       document.getElementById("nav-item-laporan").style.display = "none";
-      
       document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-      let secTable = document.getElementById("sec-tracker-tables");
-      secTable.className = "col-12";
-
+      document.getElementById("sec-tracker-tables").className = "col-12";
       new bootstrap.Tab(document.getElementById("tab-absen")).show();
 
     } else { // ADMIN
       badge.className = "badge bg-success role-badge me-2";
       document.getElementById("nav-item-keuangan").style.display = "block";
       document.getElementById("nav-item-laporan").style.display = "block";
-      
       document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
-      let secTable = document.getElementById("sec-tracker-tables");
-      secTable.className = "col-md-8";
+      document.getElementById("sec-tracker-tables").className = "col-md-8";
     }
   }
 
@@ -315,7 +358,7 @@
     .catch(err => alert("Terjadi kesalahan sistem: " + err));
   }
 
-  // 1. ABSENSI LOGIC
+  // 1. ABSENSI
   function loadKaryawan() {
     apiPost({ action: "get_karyawan" }, function(res) {
       let select = document.getElementById("selectKaryawan");
@@ -341,7 +384,7 @@
     });
   }
 
-  // 2. VISIT & TRACKER LOGIC
+  // 2. VISIT & TRACKER
   function loadTeknisiHadir() {
     apiPost({ action: "get_teknisi_hadir" }, function(res) {
       let select = document.getElementById("selectTeknisi");
@@ -408,10 +451,8 @@
             </tr>
           `;
 
-          // Masukkan ke tabel semua job aktif
           tbody.innerHTML += rowHtml;
 
-          // Jika status pekerjaan sedang berlangsung (BERANGKAT, TIBA, MULAI_KERJA)
           if (["BERANGKAT", "TIBA", "MULAI_KERJA"].includes(job.last_status)) {
             tbodyOngoing.innerHTML += rowHtml;
             hasOngoing = true;
@@ -451,7 +492,7 @@
     });
   }
 
-  // 3. KEUANGAN LOGIC
+  // 3. KEUANGAN
   function loadCompletedJobs() {
     apiPost({ action: "get_completed_jobs" }, function(res) {
       let select = document.getElementById("selectJobRef");
@@ -489,7 +530,7 @@
     });
   }
 
-  // 4. LAPORAN LOGIC
+  // 4. LAPORAN & EXPORT EXCEL
   function loadReport() {
     apiPost({ action: "get_report" }, function(res) {
       if (res.status === "success") {
@@ -501,17 +542,14 @@
     });
   }
 
-  function downloadCSV(period) {
-    apiPost({ action: "download_report", data: { period: period } }, function(res) {
+  function downloadExcel(type, period) {
+    apiPost({ action: "download_report_excel", data: { type: type, period: period } }, function(res) {
       if (res.status === "success") {
-        let blob = new Blob([res.csv_data], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", res.filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Konversi Array Data menjadi File Excel (.xlsx) menggunakan SheetJS
+        let worksheet = XLSX.utils.aoa_to_sheet(res.export_data);
+        let workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, type);
+        XLSX.writeFile(workbook, res.filename);
       } else {
         alert(res.message);
       }
