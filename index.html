@@ -282,7 +282,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwLQr9l1nyCVEHPGI_aFcwsR6HUypzuYEQVt-285kyyDmd7eT9XrTaBQxog6cGkum-vLw/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzVM8kz8DwKx3F1hXmldFvjk5C62tlPOQNHqCA51Mb08WprXFJeTuhZPAwPrGPwZWVUnw/exec";
   const ADMIN_PIN = "890890";
   let currentRole = localStorage.getItem("app_role") || "";
   let roleModalObj = null;
@@ -526,7 +526,10 @@
       }
     }, function(res) {
       alert(res.message);
-      if(res.status === "success") document.getElementById("formKeuangan").reset();
+      if(res.status === "success") {
+        document.getElementById("formKeuangan").reset();
+        loadCompletedJobs(); // Reload dropdown otomatis agar ID Job yang baru disimpan langsung hilang dari daftar
+      }
     });
   }
 
@@ -545,7 +548,6 @@
   function downloadExcel(type, period) {
     apiPost({ action: "download_report_excel", data: { type: type, period: period } }, function(res) {
       if (res.status === "success") {
-        // Konversi Array Data menjadi File Excel (.xlsx) menggunakan SheetJS
         let worksheet = XLSX.utils.aoa_to_sheet(res.export_data);
         let workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, type);
