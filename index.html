@@ -3,285 +3,233 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Operasional | Maju Jaya Teknik</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <title>Dashboard Operasional & Keuangan</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f4f6f9; font-family: sans-serif; }
-    .card-custom { border-radius: 15px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .btn-action { min-height: 48px; font-weight: bold; border-radius: 10px; }
-    .tab-content-item { display: none; }
-    .tab-content-item.active { display: block; }
-    .role-hide { display: none !important; }
+    body { background-color: #f8f9fa; }
+    .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .role-badge { font-size: 0.85rem; padding: 0.35em 0.65em; }
   </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-dark bg-primary mb-4">
-  <div class="container d-flex justify-content-between align-items-center">
-    <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-gears me-2"></i>Maju Jaya Teknik System</a>
-    <div id="userInfo" class="text-white d-none">
-      <span class="badge bg-light text-dark me-2" id="userRoleBadge">Role: -</span>
-      <button class="btn btn-outline-light btn-sm" onclick="switchRole()"><i class="fa-solid fa-right-from-bracket me-1"></i>Ganti Role</button>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold m-0">Dashboard Operasional</h3>
+    <div>
+      <span id="userRoleBadge" class="badge bg-secondary role-badge me-2">Role: Unset</span>
+      <button class="btn btn-sm btn-outline-danger" onclick="switchRole()">Ganti Role</button>
     </div>
   </div>
-</nav>
 
-<!-- Modal Pilih Role -->
-<div class="modal fade" id="roleModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-3 text-center">
-      <h4 class="fw-bold mb-3"><i class="fa-solid fa-user-shield text-primary me-2"></i>Pilih Mode Akses</h4>
-      <p class="text-muted">Silakan pilih jenis akun untuk menyesuaikan tampilan aplikasi.</p>
-      
-      <div class="d-grid gap-3 mt-3">
-        <button class="btn btn-outline-primary btn-lg fw-bold p-3" onclick="setRole('TEKNISI')">
-          <i class="fa-solid fa-helmet-safety fa-lg me-2"></i>Akses Teknisi
-          <div class="small fw-normal text-muted mt-1">Absensi & Update Status Pekerjaan</div>
-        </button>
-        <button class="btn btn-primary btn-lg fw-bold p-3" onclick="requestAdminAccess()">
-          <i class="fa-solid fa-user-gear fa-lg me-2"></i>Akses Admin
-          <div class="small fw-normal text-white-50 mt-1">Akses Penuh (Keuangan, Laporan, Buat Jadwal)</div>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Password Admin -->
-<div class="modal fade" id="adminAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content p-3">
-      <h5 class="fw-bold text-center mb-3"><i class="fa-solid fa-lock text-danger me-2"></i>Password Admin</h5>
-      <form id="formAdminAuth">
-        <div class="mb-3">
-          <input type="password" id="adminPasswordInput" class="form-control text-center fs-5" placeholder="Masukkan PIN/Password" required>
-        </div>
-        <div class="d-grid gap-2">
-          <button type="submit" class="btn btn-primary fw-bold">Masuk Admin</button>
-          <button type="button" class="btn btn-light text-muted" onclick="cancelAdminAuth()">Batal</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="container pb-5 d-none" id="mainContainer">
-  <!-- Nav Tabs -->
-  <ul class="nav nav-pills nav-justified mb-4" id="pills-tab">
-    <li class="nav-item">
-      <button class="nav-link active" id="tabBtnAbsensi" onclick="switchTab('content-absensi', this)"><i class="fa-solid fa-user-check me-1"></i> Absensi</button>
+  <!-- Navigasi Menu Tab -->
+  <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist">
+    <li class="nav-item" id="nav-item-absen">
+      <button class="nav-link active" id="tab-absen" data-bs-toggle="pill" data-bs-target="#content-absen" onclick="loadKaryawan()">Absensi</button>
     </li>
-    <li class="nav-item">
-      <button class="nav-link" id="tabBtnTeknisi" onclick="switchTab('content-teknisi', this)"><i class="fa-solid fa-truck-fast me-1"></i> Tracker Teknisi</button>
+    <li class="nav-item" id="nav-item-visit">
+      <button class="nav-link" id="tab-visit" data-bs-toggle="pill" data-bs-target="#content-visit" onclick="loadTeknisiHadir(); loadActiveJobs();">Visit & Tracker</button>
     </li>
-    <li class="nav-item role-admin-only">
-      <button class="nav-link" id="tabBtnKeuangan" onclick="switchTab('content-keuangan', this)"><i class="fa-solid fa-wallet me-1"></i> Keuangan</button>
+    <li class="nav-item" id="nav-item-keuangan">
+      <button class="nav-link" id="tab-keuangan" data-bs-toggle="pill" data-bs-target="#content-keuangan" onclick="loadCompletedJobs()">Keuangan</button>
     </li>
-    <li class="nav-item role-admin-only">
-      <button class="nav-link" id="tabBtnLaporan" onclick="switchTab('content-laporan', this)"><i class="fa-solid fa-chart-line me-1"></i> Laporan</button>
+    <li class="nav-item" id="nav-item-laporan">
+      <button class="nav-link" id="tab-laporan" data-bs-toggle="pill" data-bs-target="#content-laporan" onclick="loadReport()">Laporan</button>
     </li>
   </ul>
 
-  <div class="tab-content">
+  <div class="tab-content" id="pills-tabContent">
     
-    <!-- TAB 1: ABSENSI -->
-    <div class="tab-content-item active" id="content-absensi">
-      <div class="card card-custom p-4">
-        <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock text-primary me-2"></i>Absensi Harian Karyawan</h5>
-        <form id="formAbsen">
+    <!-- 1. TAB ABSENSI -->
+    <div class="tab-pane fade show active" id="content-absen">
+      <div class="card p-4 mx-auto" style="max-width: 500px;">
+        <h5 class="card-title fw-bold mb-3">Form Absensi Karyawan</h5>
+        <form id="formAbsen" onsubmit="submitAbsen(event)">
           <div class="mb-3">
-            <label class="form-label">ID / Nama Karyawan</label>
-            <input type="text" id="absenNama" class="form-control" placeholder="Contoh: Budi (Teknisi)" required>
+            <label class="form-label">Nama Karyawan</label>
+            <select class="form-select" id="selectKaryawan" required>
+              <option value="">-- Memuat Daftar Karyawan --</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Tipe Absen</label>
-            <select id="absenTipe" class="form-select" onchange="toggleKeteranganAbsen()" required>
+            <select class="form-select" id="tipeAbsen" required>
               <option value="MASUK">Absen Masuk</option>
               <option value="PULANG">Absen Pulang</option>
-              <option value="SAKIT">Sakit</option>
               <option value="IZIN">Izin</option>
+              <option value="SAKIT">Sakit</option>
             </select>
           </div>
-
-          <div class="mb-3" id="secKetAbsen">
-            <label class="form-label" id="lblKetAbsen">Keterangan / Alasan (Opsional)</label>
-            <textarea id="absenKeterangan" class="form-control" rows="2" placeholder="Sebutkan alasan izin/sakit..."></textarea>
+          <div class="mb-3">
+            <label class="form-label">Keterangan (Opsional)</label>
+            <textarea class="form-control" id="ketAbsen" rows="2" placeholder="Catatan tambahan..."></textarea>
           </div>
-
-          <button type="submit" class="btn btn-primary w-100 btn-action"><i class="fa-solid fa-paper-plane me-2"></i>Kirim Absensi</button>
+          <button type="submit" class="btn btn-primary w-100">Kirim Absensi</button>
         </form>
       </div>
     </div>
 
-    <!-- TAB 2: TRACKER TEKNISI -->
-    <div class="tab-content-item" id="content-teknisi">
-      <!-- INPUT JADWAL PEKERJAAN (ADMIN) -->
-      <div class="card card-custom p-4 mb-4 role-admin-only" id="cardCreateJob">
-        <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Input Pekerjaan Visit Baru (Admin)</h5>
-        <form id="formJob">
-          <div class="row g-2">
-            <div class="col-md-6 mb-2">
-              <label class="form-label small fw-bold">Tanggal Jadwal Visit</label>
-              <input type="date" id="jobTglJadwal" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-2">
-              <label class="form-label small fw-bold">Teknisi</label>
-              <input type="text" id="jobTeknisi" class="form-control" placeholder="Nama Teknisi" required>
-            </div>
-            <div class="col-md-6 mb-2">
-              <label class="form-label small fw-bold">Nama Customer</label>
-              <input type="text" id="jobCustomer" class="form-control" placeholder="Nama Customer" required>
-            </div>
-            <div class="col-md-6 mb-2">
-              <label class="form-label small fw-bold">Jenis Pekerjaan</label>
-              <input type="text" id="jobJenis" class="form-control" placeholder="Servis AC / Isi Freon" required>
-            </div>
-            <div class="col-12 mb-3">
-              <label class="form-label small fw-bold">Alamat Lengkap</label>
-              <input type="text" id="jobAlamat" class="form-control" placeholder="Alamat Customer" required>
-            </div>
+    <!-- 2. TAB VISIT & TRACKER -->
+    <div class="tab-pane fade" id="content-visit">
+      <div class="row g-4">
+        <!-- Form Input Visit Baru (Khusus Admin) -->
+        <div class="col-md-4 admin-only">
+          <div class="card p-4">
+            <h5 class="card-title fw-bold mb-3">Buat Jadwal Visit Baru</h5>
+            <form id="formVisit" onsubmit="submitVisit(event)">
+              <div class="mb-2">
+                <label class="form-label">Tanggal Jadwal</label>
+                <input type="date" class="form-control" id="tglJadwal" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Nama Customer</label>
+                <input type="text" class="form-control" id="namaCustomer" placeholder="Nama Pelanggan" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Alamat</label>
+                <textarea class="form-control" id="alamatCustomer" rows="2" placeholder="Alamat lengkap" required></textarea>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Jenis Pekerjaan</label>
+                <input type="text" class="form-control" id="jenisPekerjaan" placeholder="misal: Service AC, PC Repair" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Teknisi Assigned (Hanya Yang Hadir)</label>
+                <select class="form-select" id="selectTeknisi" required>
+                  <option value="">-- Memuat Teknisi Hadir --</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success w-100">Buat Jadwal Visit</button>
+            </form>
           </div>
-          <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-plus me-2"></i>Buat Jadwal Visit</button>
-        </form>
-      </div>
-
-      <!-- UPDATE STATUS PEKERJAAN (TEKNISI & ADMIN) -->
-      <div class="card card-custom p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div>
-            <h5 class="fw-bold m-0"><i class="fa-solid fa-stopwatch text-warning me-2"></i>Update Status Pekerjaan</h5>
-            <small class="text-muted">Diurutkan berdasarkan jadwal terdekat / pendingan lampau</small>
-          </div>
-          <button class="btn btn-sm btn-outline-secondary" onclick="loadActiveJobs()"><i class="fa-solid fa-rotate me-1"></i>Refresh List</button>
         </div>
-        <form id="formStatusJob">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Pilih Pekerjaan / Customer (Aktif)</label>
-            <select id="statusJobId" class="form-select" required>
-              <option value="">-- Loading daftar pekerjaan... --</option>
-            </select>
+
+        <!-- Section Tabel Tracker (Job Berlangsung & Semua Job Aktif) -->
+        <div class="col-md-8" id="sec-tracker-tables">
+          <!-- TABEL 1: PEKERJAAN SEDANG BERLANGSUNG -->
+          <div class="card p-4 mb-4 border-warning">
+            <h5 class="card-title fw-bold text-warning-emphasis mb-3">⚡ Pekerjaan Sedang Berlangsung</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-warning">
+                  <tr>
+                    <th>Customer / ID</th>
+                    <th>Teknisi</th>
+                    <th>Status</th>
+                    <th>Update Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyOngoingJobs">
+                  <tr><td colspan="4" class="text-center">Memuat pekerjaan berlangsung...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold">Aksi Status</label>
-            <select id="statusAction" class="form-select" required>
-              <option value="BERANGKAT">1. Berangkat dari Toko/Customer Sebelumnya</option>
-              <option value="TIBA">2. Tiba di Lokasi Customer</option>
-              <option value="MULAI_KERJA">3. Mulai Pengerjaan</option>
-              <option value="SELESAI">4. Selesai Pengerjaan</option>
-            </select>
+
+          <!-- TABEL 2: SEMUA JADWAL JOB AKTIF -->
+          <div class="card p-4">
+            <h5 class="card-title fw-bold mb-3">📋 Semua Daftar Job Aktif</h5>
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Customer / Job ID</th>
+                    <th>Teknisi</th>
+                    <th>Status Last</th>
+                    <th>Update Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyJobs">
+                  <tr><td colspan="4" class="text-center">Memuat data job...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <button type="submit" class="btn btn-warning w-100 btn-action text-dark"><i class="fa-solid fa-rotate me-2"></i>Update Waktu & Status</button>
-        </form>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 3: PENCATATAN KEUANGAN (ADMIN) -->
-    <div class="tab-content-item role-admin-only" id="content-keuangan">
-      <div class="card card-custom p-4">
-        <h5 class="fw-bold mb-3"><i class="fa-solid fa-money-bill-transfer text-success me-2"></i>Catat Pemasukan / Pengeluaran</h5>
-        <form id="formKeuangan">
-          <div class="mb-3">
+    <!-- 3. TAB KEUANGAN (Khusus Admin) -->
+    <div class="tab-pane fade" id="content-keuangan">
+      <div class="card p-4 mx-auto" style="max-width: 500px;">
+        <h5 class="card-title fw-bold mb-3">Pencatatan Keuangan</h5>
+        <form id="formKeuangan" onsubmit="submitKeuangan(event)">
+          <div class="mb-2">
             <label class="form-label">Tipe Transaksi</label>
-            <select id="keuTipe" class="form-select" onchange="toggleJobRefSection()" required>
+            <select class="form-select" id="tipeKeuangan" required>
               <option value="Pemasukan">Pemasukan</option>
               <option value="Pengeluaran">Pengeluaran</option>
             </select>
           </div>
-
-          <div class="mb-3" id="secJobRef">
-            <label class="form-label fw-bold text-primary"><i class="fa-solid fa-link me-1"></i>Pilih Pekerjaan (JOB ID)</label>
-            <select id="keuJobRef" class="form-select" onchange="autoFillCategory()">
-              <option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>
+          <div class="mb-2">
+            <label class="form-label">ID Job Ref (Opsional)</label>
+            <select class="form-select" id="selectJobRef">
+              <option value="-">-- Tanpa Job Ref (Penjualan Toko / Lainnya) --</option>
             </select>
           </div>
-
-          <div class="mb-3">
+          <div class="mb-2">
             <label class="form-label">Kategori</label>
-            <input type="text" id="keuKategori" class="form-control" placeholder="Service AC / Beli Freon / Bensin / Gaji" required>
+            <input type="text" class="form-control" id="katKeuangan" placeholder="Jasa / Sparepart / Operasional" required>
           </div>
-
-          <div id="secRincianBiaya" class="p-3 mb-3 bg-light rounded border">
-            <div class="fw-bold mb-2 text-secondary"><i class="fa-solid fa-receipt me-1"></i>Rincian Biaya Pemasukan</div>
-            <div class="row g-2">
-              <div class="col-md-6 mb-2">
-                <label class="form-label small">Biaya Jasa (Rp)</label>
-                <input type="number" id="keuJasa" class="form-control" placeholder="100000" oninput="calcTotalBiaya()">
-              </div>
-              <div class="col-md-6 mb-2">
-                <label class="form-label small">Biaya Sparepart / Produk (Rp)</label>
-                <input type="number" id="keuSparepart" class="form-control" placeholder="50000" oninput="calcTotalBiaya()">
-              </div>
+          <div class="row g-2 mb-2">
+            <div class="col">
+              <label class="form-label">Biaya Jasa</label>
+              <input type="number" class="form-control" id="biayaJasa" value="0" onkeyup="calcTotalKeu()" onchange="calcTotalKeu()">
+            </div>
+            <div class="col">
+              <label class="form-label">Biaya Part</label>
+              <input type="number" class="form-control" id="biayaPart" value="0" onkeyup="calcTotalKeu()" onchange="calcTotalKeu()">
             </div>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Total Jumlah (Rp)</label>
-            <input type="number" id="keuJumlah" class="form-control" placeholder="150000" required>
+          <div class="mb-2">
+            <label class="form-label">Total Jumlah (Rp)</label>
+            <input type="number" class="form-control fw-bold" id="totalKeuangan" required>
           </div>
-
           <div class="mb-3">
-            <label class="form-label">Keterangan / Catatan</label>
-            <textarea id="keuKeterangan" class="form-control" rows="2" placeholder="Catatan opsional..."></textarea>
+            <label class="form-label">Keterangan</label>
+            <textarea class="form-control" id="ketKeuangan" rows="2" placeholder="Catatan transaksi..."></textarea>
           </div>
-          <button type="submit" class="btn btn-success w-100 btn-action"><i class="fa-solid fa-floppy-disk me-2"></i>Simpan Transaksi</button>
+          <button type="submit" class="btn btn-warning w-100 fw-bold">Simpan Transaksi</button>
         </form>
       </div>
     </div>
 
-    <!-- TAB 4: LAPORAN (ADMIN) -->
-    <div class="tab-content-item role-admin-only" id="content-laporan">
-      <div class="card card-custom p-4 mb-4 bg-white border-top border-primary border-4">
-        <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-file-csv text-primary me-2"></i>Download Rekap Laporan Keuangan</h5>
-        <div class="row g-2 align-items-center">
-          <div class="col-md-8">
-            <select id="dlPeriode" class="form-select">
-              <option value="HARIAN">Laporan Hari Ini</option>
-              <option value="MINGGUAN">Laporan 7 Hari Terakhir (Mingguan)</option>
-              <option value="BULANAN">Laporan 30 Hari Terakhir (Bulanan)</option>
-            </select>
+    <!-- 4. TAB LAPORAN (Khusus Admin) -->
+    <div class="tab-pane fade" id="content-laporan">
+      <div class="card p-4">
+        <h5 class="card-title fw-bold mb-3">Ringkasan Laporan</h5>
+        <div class="row text-center g-3 mb-4">
+          <div class="col-md-3">
+            <div class="p-3 bg-light rounded border">
+              <small class="text-muted">Total Pemasukan</small>
+              <h4 class="text-success fw-bold" id="repPemasukan">Rp 0</h4>
+            </div>
           </div>
-          <div class="col-md-4">
-            <button class="btn btn-primary w-100 font-weight-bold" onclick="downloadReport()"><i class="fa-solid fa-download me-2"></i>Download CSV/Excel</button>
+          <div class="col-md-3">
+            <div class="p-3 bg-light rounded border">
+              <small class="text-muted">Total Pengeluaran</small>
+              <h4 class="text-danger fw-bold" id="repPengeluaran">Rp 0</h4>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="card card-custom p-3 bg-white border-start border-success border-4">
-            <small class="text-muted fw-bold">TOTAL PEMASUKAN</small>
-            <h4 class="fw-bold text-success mb-0" id="repPemasukan">Rp 0</h4>
+          <div class="col-md-3">
+            <div class="p-3 bg-light rounded border">
+              <small class="text-muted">Rata-rata Waktu Jalan</small>
+              <h4 class="text-primary fw-bold" id="repAvgJalan">0 Mnt</h4>
+            </div>
           </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card card-custom p-3 bg-white border-start border-danger border-4">
-            <small class="text-muted fw-bold">TOTAL PENGELUARAN</small>
-            <h4 class="fw-bold text-danger mb-0" id="repPengeluaran">Rp 0</h4>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card card-custom p-3 bg-white border-start border-primary border-4">
-            <small class="text-muted fw-bold">SALDO BERSIH</small>
-            <h4 class="fw-bold text-primary mb-0" id="repSaldo">Rp 0</h4>
+          <div class="col-md-3">
+            <div class="p-3 bg-light rounded border">
+              <small class="text-muted">Rata-rata Waktu Kerja</small>
+              <h4 class="text-info fw-bold" id="repAvgKerja">0 Mnt</h4>
+            </div>
           </div>
         </div>
 
-        <div class="col-md-6 mt-3">
-          <div class="card card-custom p-4 bg-white">
-            <h6 class="fw-bold text-secondary"><i class="fa-solid fa-route me-2"></i>Rata-Rata Perjalanan</h6>
-            <h2 class="fw-bold text-dark mt-2" id="repAvgJalan">0 <small class="fs-6">Menit</small></h2>
-            <small class="text-muted">Diukur dari keberangkatan hingga sampai lokasi customer.</small>
-          </div>
-        </div>
-
-        <div class="col-md-6 mt-3">
-          <div class="card card-custom p-4 bg-white">
-            <h6 class="fw-bold text-secondary"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Rata-Rata Pengerjaan</h6>
-            <h2 class="fw-bold text-dark mt-2" id="repAvgKerja">0 <small class="fs-6">Menit</small></h2>
-            <small class="text-muted">Diukur dari awal teknisi mulai hingga pekerjaan selesai.</small>
-          </div>
+        <h6 class="fw-bold mb-2">Download Rekap Laporan Keuangan (CSV)</h6>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary" onclick="downloadCSV('HARIAN')">Rekap Harian</button>
+          <button class="btn btn-outline-secondary" onclick="downloadCSV('MINGGUAN')">Rekap Mingguan</button>
+          <button class="btn btn-outline-secondary" onclick="downloadCSV('BULANAN')">Rekap Bulanan</button>
         </div>
       </div>
     </div>
@@ -289,292 +237,285 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Modal Pemilih Role -->
+<div class="modal fade" id="roleModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <h4 class="fw-bold mb-3">Pilih Hak Akses Anda</h4>
+      <p class="text-muted mb-4">Silakan pilih opsi akses aplikasi sesuai tugas Anda:</p>
+      <div class="d-grid gap-3">
+        <button class="btn btn-outline-primary btn-lg fw-bold" onclick="setRole('TEKNISI')">Teknisi (Absensi & Update Job)</button>
+        <button class="btn btn-primary btn-lg fw-bold" onclick="setRole('ADMIN')">Admin (Akses Penuh)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const ADMIN_PASS = "890890";
-  let activeJobsList = [];
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzp6eicl-IV-3mXuN1LqlHvn_c8U2a9-ZQnWt8ppQUPX8oQtFyLfugyCh4Q3dYHbsUNVA/exec";
   let currentRole = localStorage.getItem("app_role") || "";
-  let roleModalObj = new bootstrap.Modal(document.getElementById('roleModal'));
-  let adminAuthModalObj = new bootstrap.Modal(document.getElementById('adminAuthModal'));
+  let roleModalObj = null;
 
-  window.addEventListener('DOMContentLoaded', () => {
-    // Set default tanggal hari ini pada input jadwal visit
-    const todayStr = new Date().toISOString().split('T')[0];
-    document.getElementById("jobTglJadwal").value = todayStr;
-
+  document.addEventListener("DOMContentLoaded", function() {
+    roleModalObj = new bootstrap.Modal(document.getElementById('roleModal'));
     if (!currentRole) {
       roleModalObj.show();
     } else {
-      applyRolePermissions(currentRole);
+      applyRolePermissions();
     }
-  });
-
-  function requestAdminAccess() {
-    roleModalObj.hide();
-    document.getElementById("adminPasswordInput").value = "";
-    adminAuthModalObj.show();
-  }
-
-  function cancelAdminAuth() {
-    adminAuthModalObj.hide();
-    roleModalObj.show();
-  }
-
-  document.getElementById("formAdminAuth").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const inputPass = document.getElementById("adminPasswordInput").value;
-    if (inputPass === ADMIN_PASS) {
-      adminAuthModalObj.hide();
-      setRole('ADMIN');
-    } else {
-      alert("Password Admin Salah!");
-      document.getElementById("adminPasswordInput").value = "";
-    }
+    loadKaryawan();
+    document.getElementById("tglJadwal").value = new Date().toISOString().split('T')[0];
   });
 
   function setRole(role) {
     currentRole = role;
     localStorage.setItem("app_role", role);
     if (roleModalObj) roleModalObj.hide();
-    applyRolePermissions(role);
+    applyRolePermissions();
   }
 
   function switchRole() {
-    localStorage.removeItem("app_role");
-    location.reload();
+    roleModalObj.show();
   }
 
-  function applyRolePermissions(role) {
-    document.getElementById("mainContainer").classList.remove("d-none");
-    document.getElementById("userInfo").classList.remove("d-none");
-    document.getElementById("userRoleBadge").innerText = "Role: " + role;
+  function applyRolePermissions() {
+    let badge = document.getElementById("userRoleBadge");
+    badge.innerText = "Role: " + currentRole;
 
-    if (role === "TEKNISI") {
-      document.querySelectorAll(".role-admin-only").forEach(el => el.classList.add("role-hide"));
-      switchTab('content-absensi', document.getElementById('tabBtnAbsensi'));
-    } else {
-      document.querySelectorAll(".role-admin-only").forEach(el => el.classList.remove("role-hide"));
-    }
-    loadActiveJobs();
-  }
-
-  function switchTab(targetId, btnElement) {
-    document.querySelectorAll('.tab-content-item').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('#pills-tab .nav-link').forEach(btn => btn.classList.remove('active'));
-
-    document.getElementById(targetId).classList.add('active');
-    btnElement.classList.add('active');
-
-    if (targetId === 'content-teknisi' || targetId === 'content-keuangan') {
-      loadActiveJobs();
-    } else if (targetId === 'content-laporan') {
-      loadReport();
-    }
-  }
-
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzopoA1yEHm-EXdXDIkcazgBr_SAk7ePjuqSyAWmcXoFNEKdX7f_ijB7VcxCs0Rhgb6eg/exec";
-
-  async function postData(action, data) {
-    try {
-      const res = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: action, data: data })
-      });
-      return await res.json();
-    } catch (e) {
-      alert("Gagal terhubung ke database!");
-      console.error(e);
-    }
-  }
-
-  function toggleKeteranganAbsen() {
-    const tipe = document.getElementById("absenTipe").value;
-    const ketInput = document.getElementById("absenKeterangan");
-    const lbl = document.getElementById("lblKetAbsen");
-
-    if (tipe === "SAKIT" || tipe === "IZIN") {
-      lbl.innerText = "Alasan " + (tipe === "SAKIT" ? "Sakit" : "Izin") + " (Wajib)";
-      ketInput.setAttribute("required", "true");
-    } else {
-      lbl.innerText = "Keterangan / Alasan (Opsional)";
-      ketInput.removeAttribute("required");
-    }
-  }
-
-  // Form Absensi
-  document.getElementById("formAbsen").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const res = await postData("absen", {
-      id_karyawan: document.getElementById("absenNama").value,
-      nama: document.getElementById("absenNama").value,
-      tipe: document.getElementById("absenTipe").value,
-      keterangan: document.getElementById("absenKeterangan").value
-    });
-    if (res) alert(res.message);
-    e.target.reset();
-  });
-
-  // Helper Format Label Waktu Jadwal
-  function getScheduleTag(tglJadwalStr) {
-    if (!tglJadwalStr) return "[TGL UNKNOWN]";
-    
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    
-    const targetDate = new Date(tglJadwalStr);
-    targetDate.setHours(0,0,0,0);
-
-    const diffTime = targetDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return "[⚠️ OVERDUE]"; // Pendingan dari hari lampau
-    } else if (diffDays === 0) {
-      return "[HARI INI]";
-    } else if (diffDays === 1) {
-      return "[BESOK]";
-    } else {
-      return `[${tglJadwalStr}]`;
-    }
-  }
-
-  // Load Active Jobs
-  async function loadActiveJobs() {
-    const res = await postData("get_active_jobs", {});
-    const selectStatusJob = document.getElementById("statusJobId");
-    const selectKeuJob = document.getElementById("keuJobRef");
-
-    if (res && res.status === "success" && res.data.length > 0) {
-      activeJobsList = res.data;
+    if (currentRole === "TEKNISI") {
+      badge.className = "badge bg-info text-dark role-badge me-2";
+      document.getElementById("nav-item-keuangan").style.display = "none";
+      document.getElementById("nav-item-laporan").style.display = "none";
       
-      selectStatusJob.innerHTML = '<option value="">-- Pilih Pekerjaan (Sesuai Urutan Prioritas) --</option>';
-      activeJobsList.forEach((j, index) => {
-        const queueNum = index + 1;
-        const tag = getScheduleTag(j.tgl_jadwal);
-        selectStatusJob.innerHTML += `<option value="${j.id_job}">#${queueNum} ${tag} [${j.teknisi}] ${j.customer} - ${j.jenis} (${j.id_job})</option>`;
-      });
+      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
+      let secTable = document.getElementById("sec-tracker-tables");
+      secTable.className = "col-12";
 
-      if (selectKeuJob) {
-        selectKeuJob.innerHTML = '<option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>';
-        activeJobsList.forEach((j, index) => {
-          const queueNum = index + 1;
-          const tag = getScheduleTag(j.tgl_jadwal);
-          selectKeuJob.innerHTML += `<option value="${j.id_job}">#${queueNum} ${tag} [${j.teknisi}] ${j.id_job} - ${j.customer}</option>`;
-        });
+      new bootstrap.Tab(document.getElementById("tab-absen")).show();
+
+    } else { // ADMIN
+      badge.className = "badge bg-success role-badge me-2";
+      document.getElementById("nav-item-keuangan").style.display = "block";
+      document.getElementById("nav-item-laporan").style.display = "block";
+      
+      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "block");
+      let secTable = document.getElementById("sec-tracker-tables");
+      secTable.className = "col-md-8";
+    }
+  }
+
+  function apiPost(actionData, callback) {
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(actionData)
+    })
+    .then(res => res.json())
+    .then(data => callback(data))
+    .catch(err => alert("Terjadi kesalahan sistem: " + err));
+  }
+
+  // 1. ABSENSI LOGIC
+  function loadKaryawan() {
+    apiPost({ action: "get_karyawan" }, function(res) {
+      let select = document.getElementById("selectKaryawan");
+      select.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+      if (res.status === "success" && res.data.length > 0) {
+        res.data.forEach(nama => { select.innerHTML += `<option value="${nama}">${nama}</option>`; });
       }
-    } else {
-      selectStatusJob.innerHTML = '<option value="">Tidak ada pekerjaan aktif</option>';
-      if (selectKeuJob) selectKeuJob.innerHTML = '<option value="-">-- Pilih / Tanpa Pekerjaan Spesifik --</option>';
-    }
-  }
-
-  function autoFillCategory() {
-    const selectedJobId = document.getElementById("keuJobRef").value;
-    const found = activeJobsList.find(j => j.id_job === selectedJobId);
-    if (found) {
-      document.getElementById("keuKategori").value = found.jenis;
-    }
-  }
-
-  function calcTotalBiaya() {
-    const jasa = Number(document.getElementById("keuJasa").value) || 0;
-    const sparepart = Number(document.getElementById("keuSparepart").value) || 0;
-    if (jasa > 0 || sparepart > 0) {
-      document.getElementById("keuJumlah").value = jasa + sparepart;
-    }
-  }
-
-  function toggleJobRefSection() {
-    const tipe = document.getElementById("keuTipe").value;
-    if (tipe === "Pengeluaran") {
-      document.getElementById("secRincianBiaya").style.display = "none";
-    } else {
-      document.getElementById("secRincianBiaya").style.display = "block";
-    }
-  }
-
-  // Create Job (Admin)
-  document.getElementById("formJob").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const res = await postData("update_job_status", {
-      status_action: "CREATE",
-      tgl_jadwal: document.getElementById("jobTglJadwal").value,
-      nama_teknisi: document.getElementById("jobTeknisi").value,
-      nama_customer: document.getElementById("jobCustomer").value,
-      alamat: document.getElementById("jobAlamat").value,
-      jenis_pekerjaan: document.getElementById("jobJenis").value
     });
-    if (res) alert(res.message);
-    e.target.reset();
-    
-    // Reset tanggal ke hari ini
-    document.getElementById("jobTglJadwal").value = new Date().toISOString().split('T')[0];
-    loadActiveJobs();
-  });
+  }
 
-  // Update Status Job (Teknisi)
-  document.getElementById("formStatusJob").addEventListener("submit", async (e) => {
+  function submitAbsen(e) {
     e.preventDefault();
-    const selectedJob = document.getElementById("statusJobId").value;
-    const actionStatus = document.getElementById("statusAction").value;
-
-    const res = await postData("update_job_status", {
-      id_job: selectedJob,
-      status_action: actionStatus
+    apiPost({
+      action: "absen",
+      data: {
+        nama: document.getElementById("selectKaryawan").value,
+        tipe: document.getElementById("tipeAbsen").value,
+        keterangan: document.getElementById("ketAbsen").value
+      }
+    }, function(res) {
+      alert(res.message);
+      if(res.status === "success") document.getElementById("formAbsen").reset();
     });
+  }
 
-    if (res) {
+  // 2. VISIT & TRACKER LOGIC
+  function loadTeknisiHadir() {
+    apiPost({ action: "get_teknisi_hadir" }, function(res) {
+      let select = document.getElementById("selectTeknisi");
+      select.innerHTML = '<option value="">-- Pilih Teknisi (Hadir Hari Ini) --</option>';
+      if (res.status === "success" && res.data.length > 0) {
+        res.data.forEach(nama => { select.innerHTML += `<option value="${nama}">${nama}</option>`; });
+      } else {
+        select.innerHTML = '<option value="">Belum Ada Teknisi Absen Masuk Hari Ini</option>';
+      }
+    });
+  }
+
+  function submitVisit(e) {
+    e.preventDefault();
+    apiPost({
+      action: "update_job_status",
+      data: {
+        status_action: "CREATE",
+        tgl_jadwal: document.getElementById("tglJadwal").value,
+        nama_customer: document.getElementById("namaCustomer").value,
+        alamat: document.getElementById("alamatCustomer").value,
+        jenis_pekerjaan: document.getElementById("jenisPekerjaan").value,
+        nama_teknisi: document.getElementById("selectTeknisi").value
+      }
+    }, function(res) {
+      alert(res.message);
+      if(res.status === "success") {
+        document.getElementById("formVisit").reset();
+        document.getElementById("tglJadwal").value = new Date().toISOString().split('T')[0];
+        loadActiveJobs();
+      }
+    });
+  }
+
+  function loadActiveJobs() {
+    apiPost({ action: "get_active_jobs" }, function(res) {
+      let tbody = document.getElementById("tbodyJobs");
+      let tbodyOngoing = document.getElementById("tbodyOngoingJobs");
+      
+      tbody.innerHTML = "";
+      tbodyOngoing.innerHTML = "";
+
+      if (res.status === "success" && res.data.length > 0) {
+        let hasOngoing = false;
+
+        res.data.forEach(job => {
+          let rowHtml = `
+            <tr>
+              <td>
+                <strong>${job.customer}</strong><br>
+                <small class="text-muted">${job.id_job} | ${job.jenis}</small>
+              </td>
+              <td>${job.teknisi}</td>
+              <td><span class="badge ${getBadgeColor(job.last_status)}">${job.last_status}</span></td>
+              <td>
+                <select class="form-select form-select-sm" onchange="updateStatus('${job.id_job}', this.value)">
+                  <option value="">-- Ubah Status --</option>
+                  <option value="BERANGKAT">Berangkat</option>
+                  <option value="TIBA">Tiba</option>
+                  <option value="MULAI_KERJA">Mulai Kerja</option>
+                  <option value="SELESAI">Selesai</option>
+                </select>
+              </td>
+            </tr>
+          `;
+
+          // Masukkan ke tabel semua job aktif
+          tbody.innerHTML += rowHtml;
+
+          // Jika status pekerjaan sedang berlangsung (BERANGKAT, TIBA, MULAI_KERJA)
+          if (["BERANGKAT", "TIBA", "MULAI_KERJA"].includes(job.last_status)) {
+            tbodyOngoing.innerHTML += rowHtml;
+            hasOngoing = true;
+          }
+        });
+
+        if (!hasOngoing) {
+          tbodyOngoing.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada pekerjaan yang sedang berjalan</td></tr>';
+        }
+
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada job aktif saat ini</td></tr>';
+        tbodyOngoing.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada pekerjaan yang sedang berjalan</td></tr>';
+      }
+    });
+  }
+
+  function getBadgeColor(status) {
+    switch (status) {
+      case "SCHEDULED": return "bg-secondary";
+      case "BERANGKAT": return "bg-primary";
+      case "TIBA": return "bg-warning text-dark";
+      case "MULAI_KERJA": return "bg-info text-dark";
+      case "SELESAI": return "bg-success";
+      default: return "bg-dark";
+    }
+  }
+
+  function updateStatus(jobId, nextStatus) {
+    if (!nextStatus) return;
+    apiPost({
+      action: "update_job_status",
+      data: { id_job: jobId, status_action: nextStatus }
+    }, function(res) {
       alert(res.message);
       loadActiveJobs();
-    }
-  });
-
-  // Input Keuangan
-  document.getElementById("formKeuangan").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const res = await postData("add_keuangan", {
-      tipe: document.getElementById("keuTipe").value,
-      kategori: document.getElementById("keuKategori").value,
-      jumlah: document.getElementById("keuJumlah").value,
-      keterangan: document.getElementById("keuKeterangan").value,
-      id_job_ref: document.getElementById("keuJobRef").value,
-      biaya_jasa: document.getElementById("keuJasa").value,
-      biaya_sparepart: document.getElementById("keuSparepart").value
     });
-    if (res) alert(res.message);
-    e.target.reset();
-  });
-
-  // Load Laporan
-  async function loadReport() {
-    const res = await postData("get_report", {});
-    if (res && res.status === "success") {
-      const d = res.data;
-      document.getElementById("repPemasukan").innerText = "Rp " + Number(d.pemasukan).toLocaleString('id-ID');
-      document.getElementById("repPengeluaran").innerText = "Rp " + Number(d.pengeluaran).toLocaleString('id-ID');
-      document.getElementById("repSaldo").innerText = "Rp " + Number(d.saldo).toLocaleString('id-ID');
-      document.getElementById("repAvgJalan").innerHTML = d.avg_durasi_perjalanan_menit + ' <small class="fs-6">Menit</small>';
-      document.getElementById("repAvgKerja").innerHTML = d.avg_durasi_pengerjaan_menit + ' <small class="fs-6">Menit</small>';
-    }
   }
 
-  // Download Laporan
-  async function downloadReport() {
-    const period = document.getElementById("dlPeriode").value;
-    const res = await postData("download_report", { period: period });
-    
-    if (res && res.status === "success") {
-      const blob = new Blob([res.csv_data], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", res.filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      alert("Gagal mengunduh laporan.");
-    }
+  // 3. KEUANGAN LOGIC
+  function loadCompletedJobs() {
+    apiPost({ action: "get_completed_jobs" }, function(res) {
+      let select = document.getElementById("selectJobRef");
+      select.innerHTML = '<option value="-">-- Tanpa Job Ref (Penjualan Toko / Lainnya) --</option>';
+      if (res.status === "success" && res.data.length > 0) {
+        res.data.forEach(job => {
+          select.innerHTML += `<option value="${job.id_job}">${job.label}</option>`;
+        });
+      }
+    });
+  }
+
+  function calcTotalKeu() {
+    let jasa = parseFloat(document.getElementById("biayaJasa").value) || 0;
+    let part = parseFloat(document.getElementById("biayaPart").value) || 0;
+    document.getElementById("totalKeuangan").value = jasa + part;
+  }
+
+  function submitKeuangan(e) {
+    e.preventDefault();
+    apiPost({
+      action: "add_keuangan",
+      data: {
+        tipe: document.getElementById("tipeKeuangan").value,
+        id_job_ref: document.getElementById("selectJobRef").value,
+        kategori: document.getElementById("katKeuangan").value,
+        biaya_jasa: document.getElementById("biayaJasa").value,
+        biaya_sparepart: document.getElementById("biayaPart").value,
+        jumlah: document.getElementById("totalKeuangan").value,
+        keterangan: document.getElementById("ketKeuangan").value
+      }
+    }, function(res) {
+      alert(res.message);
+      if(res.status === "success") document.getElementById("formKeuangan").reset();
+    });
+  }
+
+  // 4. LAPORAN LOGIC
+  function loadReport() {
+    apiPost({ action: "get_report" }, function(res) {
+      if (res.status === "success") {
+        document.getElementById("repPemasukan").innerText = "Rp " + Number(res.data.pemasukan).toLocaleString('id-ID');
+        document.getElementById("repPengeluaran").innerText = "Rp " + Number(res.data.pengeluaran).toLocaleString('id-ID');
+        document.getElementById("repAvgJalan").innerText = res.data.avg_durasi_perjalanan_menit + " Mnt";
+        document.getElementById("repAvgKerja").innerText = res.data.avg_durasi_pengerjaan_menit + " Mnt";
+      }
+    });
+  }
+
+  function downloadCSV(period) {
+    apiPost({ action: "download_report", data: { period: period } }, function(res) {
+      if (res.status === "success") {
+        let blob = new Blob([res.csv_data], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement("a");
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", res.filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert(res.message);
+      }
+    });
   }
 </script>
 </body>
